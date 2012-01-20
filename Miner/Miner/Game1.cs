@@ -19,6 +19,12 @@ namespace Miner
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        Texture2D TileSheet;
+
+        GameBoard gameBoard;
+
+        Rectangle EmptyCell = new Rectangle(0, 330, 22, 22);
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -33,7 +39,11 @@ namespace Miner
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            this.IsMouseVisible = true;
+            graphics.PreferredBackBufferWidth = 800;
+            graphics.PreferredBackBufferHeight = 600;
+            graphics.ApplyChanges();
+            gameBoard = new GameBoard(10, 16);
 
             base.Initialize();
         }
@@ -47,7 +57,7 @@ namespace Miner
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            TileSheet = Content.Load<Texture2D>(@"Textures\Tile_sheet");
         }
 
         /// <summary>
@@ -66,11 +76,9 @@ namespace Miner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
 
-            // TODO: Add your update logic here
+            HandleMouseInput(Mouse.GetState());
+
 
             base.Update(gameTime);
         }
@@ -83,9 +91,54 @@ namespace Miner
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+
+            for (int x = 0; x < gameBoard.GameBoardWidth; x++)
+            {
+                for (int y = 0; y < gameBoard.GameBoardHeight; y++)
+                {
+                    int pixelX = (x * EmptyCell.Width) - x;
+                    int pixelY = (y * EmptyCell.Height) - y;
+
+                    spriteBatch.Draw(TileSheet,
+                        new Rectangle(pixelX, pixelY, EmptyCell.Width, EmptyCell.Height),
+                        EmptyCell,
+                        Color.White);
+
+                    pixelX = (x * BoardCell.CellWidth) + x + 1;
+                    pixelY = (y * BoardCell.CellHeight) + y + 1;
+
+                    spriteBatch.Draw(TileSheet,
+                        new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight),
+                        gameBoard.GetTileRect(x, y),
+                        Color.White);
+                }
+            }
+
+            spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        /*-----------------------------------------------------------*/
+        private void HandleMouseInput(MouseState mouseState)
+        {
+            if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                for (int x = 0; x < gameBoard.GameBoardWidth; x++)
+                {
+                    for (int y = 0; y < gameBoard.GameBoardHeight; y++)
+                    {
+                        int pixelX = (x * BoardCell.CellWidth) + x + 1;
+                        int pixelY = (y * BoardCell.CellHeight) + y + 1;
+                        Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
+                        if (rect.Contains(mouseState.X, mouseState.Y))
+                        {
+                            gameBoard.SetTypeCell(x, y, BoardCell.TypeCell.Empty);
+                        }
+                    }
+                }
+            }
         }
     }
 }
