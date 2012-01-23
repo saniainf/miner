@@ -23,7 +23,7 @@ namespace Miner
 
         GameBoard gameBoard;
 
-        Rectangle EmptyCell = new Rectangle(0, 330, 22, 22);
+        Rectangle BackgroundCell = new Rectangle(0, 330, 22, 22);
 
         public Game1()
         {
@@ -84,7 +84,7 @@ namespace Miner
         }
 
         /// <summary>
-        /// This is called when the game should draw itself.
+        /// отрисовка игры
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
@@ -97,21 +97,26 @@ namespace Miner
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
-                    int pixelX = (x * EmptyCell.Width) - x;
-                    int pixelY = (y * EmptyCell.Height) - y;
+                    //////////////////////////////////////////////////////////////////////////
+                    // отрисовка бэкграунда
+                    //////////////////////////////////////////////////////////////////////////
+                    int pixelX = (x * BackgroundCell.Width) - x;
+                    int pixelY = (y * BackgroundCell.Height) - y;
 
                     spriteBatch.Draw(TileSheet,
-                        new Rectangle(pixelX, pixelY, EmptyCell.Width, EmptyCell.Height),
-                        EmptyCell,
+                        new Rectangle(pixelX, pixelY, BackgroundCell.Width, BackgroundCell.Height),
+                        BackgroundCell,
                         Color.White);
-
+                    //////////////////////////////////////////////////////////////////////////
+                    // отрисовка €чеек 
+                    //////////////////////////////////////////////////////////////////////////
                     pixelX = (x * BoardCell.CellWidth) + x + 1;
                     pixelY = (y * BoardCell.CellHeight) + y + 1;
 
                     spriteBatch.Draw(TileSheet,
                         new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight),
-                        gameBoard.GetTileRect(x, y),
-                        Color.White);
+                        gameBoard.GetTileRect(x, y), Color.White);
+                    //////////////////////////////////////////////////////////////////////////
                 }
             }
 
@@ -120,22 +125,32 @@ namespace Miner
             base.Draw(gameTime);
         }
 
-        /*-----------------------------------------------------------*/
+        /// <summary>
+        /// update инпута
+        /// </summary>
+        /// <param name="mouseState"></param>
         private void HandleMouseInput(MouseState mouseState)
         {
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            for (int x = 0; x < gameBoard.GameBoardWidth; x++)
             {
-                for (int x = 0; x < gameBoard.GameBoardWidth; x++)
+                for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
-                    for (int y = 0; y < gameBoard.GameBoardHeight; y++)
+                    //////////////////////////////////////////////////////////////////////////
+                    // rectangle провер€емой €чейки
+                    //////////////////////////////////////////////////////////////////////////
+                    int pixelX = (x * BoardCell.CellWidth) + x + 1;
+                    int pixelY = (y * BoardCell.CellHeight) + y + 1;
+                    Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
+                    //////////////////////////////////////////////////////////////////////////
+
+                    if (gameBoard.MouseSelect(x, y))
                     {
-                        int pixelX = (x * BoardCell.CellWidth) + x + 1;
-                        int pixelY = (y * BoardCell.CellHeight) + y + 1;
-                        Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
-                        if (rect.Contains(mouseState.X, mouseState.Y))
-                        {
-                            gameBoard.SetTypeCell(x, y, BoardCell.TypeCell.Empty);
-                        }
+                        gameBoard.MouseSelectOFF(x, y); // обнул€ем селект
+                    }
+
+                    if (rect.Contains(mouseState.X, mouseState.Y))
+                    {
+                        gameBoard.MouseSelectON(x, y); // если выделена то ставим selectOn
                     }
                 }
             }
