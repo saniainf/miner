@@ -82,20 +82,24 @@ namespace Miner
             int x = Offset;
             int y = SheetSellSize * (int)type + Offset;
 
-            if (_suffixPress)
-            {
-                y = SheetSellSize + Offset;
-            }
-
             if (_suffixClose)
             {
                 y = SheetSellSize * 11 + Offset;
+
+                if (_suffixPress)
+                {
+                    y = Offset;
+                }
+
+                else if (_suffixSelect)
+                {
+                    y = SheetSellSize * 12 + Offset;
+                }
             }
 
-            if (_suffixSelect)
-            {
-                y = SheetSellSize * 12 + Offset;
-            }
+
+
+
 
             return new Rectangle(x, y, CellWidth, CellHeight);
         }
