@@ -77,21 +77,21 @@ namespace Miner
                 {
                     int count = 0;
                     //////////////////////////////////////////////////////////////////////////
-                    if (!boardSquares[x,y].MineHave)
+                    if (!boardSquares[x, y].MineHave)
                     {
-	                    for (int miniX = x - 1; miniX <= x + 1; miniX++)
-	                    {
-	                        for (int miniY = y - 1; miniY <= y + 1; miniY++)
-	                        {
-	                            if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight)
-	                            {
-	                                if (boardSquares[miniX, miniY].MineHave)
-	                                {
-	                                    count = count + 1;
-	                                }
-	                            }
-	                        }
-	                    }
+                        for (int miniX = x - 1; miniX <= x + 1; miniX++)
+                        {
+                            for (int miniY = y - 1; miniY <= y + 1; miniY++)
+                            {
+                                if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight)
+                                {
+                                    if (boardSquares[miniX, miniY].MineHave)
+                                    {
+                                        count = count + 1;
+                                    }
+                                }
+                            }
+                        }
                     }
                     //////////////////////////////////////////////////////////////////////////
                     if (count > 0)
@@ -100,6 +100,42 @@ namespace Miner
                     }
                 }
             }
+        }
+
+        public void OpenEmptyCell(int startX, int startY)
+        {
+            List<Vector2> ListCells = new List<Vector2>();
+            ListCells.Add(new Vector2(startX, startY));
+            int Index = 0;
+            int preIndex;
+
+            do
+            {
+                preIndex = Index;
+                int X = (int)ListCells[Index].X;
+                int Y = (int)ListCells[Index].Y;
+
+                for (int miniX = X - 1; miniX <= X + 1; miniX++)
+                {
+                    for (int miniY = Y - 1; miniY <= Y + 1; miniY++)
+                    {
+                        if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight)
+                        {
+                            if (boardSquares[miniX, miniY].SuffixClose)
+                            {
+                                if (boardSquares[miniX, miniY].EmptyCell)
+                                {
+                                    ListCells.Add(new Vector2(miniX, miniY));
+                                    Index += 1;
+                                }
+                                CellCloseOFF(miniX, miniY);
+                                MouseLBPressOFF(miniX, miniY);
+                                MouseSelectOFF(miniX, miniY);
+                            }
+                        }
+                    }
+                }
+            } while (Index != preIndex);
         }
 
         /// <summary>
@@ -142,6 +178,8 @@ namespace Miner
         public void CellCloseOFF(int x, int y)
         {
             boardSquares[x, y].CellCloseOFF();
+            if (boardSquares[x, y].EmptyCell)
+                OpenEmptyCell(x, y);
         }
 
         public void FlagON(int x, int y)

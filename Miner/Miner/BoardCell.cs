@@ -80,11 +80,28 @@ namespace Miner
             get { return _suffixMaybe; }
         }
 
+        /// <summary>
+        /// проверка наличия мины
+        /// </summary>
         public bool MineHave
         {
             get
             {
                 if (type == TypeCell.Mine)
+                    return true;
+                else
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// проверка пустой клетки
+        /// </summary>
+        public bool EmptyCell
+        {
+            get
+            {
+                if (type == TypeCell.Empty)
                     return true;
                 else
                     return false;
@@ -98,7 +115,7 @@ namespace Miner
         public BoardCell(TypeCell type)
         {
             this.type = type;
-            _suffixClose = false;
+            _suffixClose = true;
             _suffixPress = false;
             _suffixSelect = false;
             _suffixFlag = false;
