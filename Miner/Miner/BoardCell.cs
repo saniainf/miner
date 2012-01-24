@@ -203,13 +203,13 @@ namespace Miner
             type = TypeCell.Mine;
         }
 
-        /* установка цифры количесва мин вокруг ячейки */
+        /* смена типа ячейки на цифру количесва мин вокруг ячейки */
         public void AddNumber(int count)
         {
             type = (TypeCell)count;
         }
 
-        /* методы изменения суффиксов */
+        /* методы изменения суффиксов 
         public void MouseLBPressON()
         {
             _suffixPress = true;
@@ -259,5 +259,6 @@ namespace Miner
         {
             _suffixMaybe = false;
         }
+        */
     }
 }

@@ -33,12 +33,10 @@ namespace Miner
             boardSquares = new BoardCell[width, height];
 
             ClearBoard();
-            PlaceMines();
-            NumberInCell();
         }
 
         /// <summary>
-        /// просто очистка всего поля
+        /// просто очистка всего поля и установка новых мин
         /// </summary>
         private void ClearBoard()
         {
@@ -49,6 +47,8 @@ namespace Miner
                     boardSquares[x, y] = new BoardCell(BoardCell.TypeCell.Empty);
                 }
             }
+            PlaceMines();
+            NumberInCell();
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Miner
         }
 
         /// <summary>
-        /// установка количества мин вокруг ячейки
+        /// вычесление количества мин вокруг ячейки
         /// </summary>
         private void NumberInCell()
         {
@@ -104,6 +104,19 @@ namespace Miner
         }
 
         /// <summary>
+        /// обнуление 2 суффиксов ячейки, Press & Select
+        /// </summary>
+        /// <param name="x">X ячейки</param>
+        /// <param name="y">Y ячейки</param>
+        public void Clear2Suffix(int x, int y)
+        {
+            if (boardSquares[x, y].SuffixPress && !boardSquares[x, y].SuffixSelect) // недаст убрать PressOn пока ячейка выделена
+                boardSquares[x, y].SuffixPress = false;
+            if (boardSquares[x, y].SuffixSelect)
+                boardSquares[x, y].SuffixSelect = false;
+        }
+
+        /// <summary>
         /// открыть все пустые ячейки рядом с начальной
         /// </summary>
         /// <param name="startX">X начальноя ячейки</param>
@@ -132,11 +145,11 @@ namespace Miner
                                 {
                                     ListCells.Add(new Point(miniX, miniY));
                                 }
-                                boardSquares[miniX, miniY].CellCloseOFF();
+                                boardSquares[miniX, miniY].SuffixClose = false;
+                                // TODO: разобраться с рекурсией
                                 if (boardSquares[miniX, miniY].EmptyCell)
                                     OpenEmptyCell(miniX, miniY);
-                                MouseLBPressOFF(miniX, miniY);
-                                MouseSelectOFF(miniX, miniY);
+                                Clear2Suffix(miniX, miniY);
                             }
                         }
                     }
@@ -144,52 +157,31 @@ namespace Miner
             } while (ListCells.Count - 1 != preCount);
         }
 
+        /// <summary>
+        /// проверка состояния ячейки и установка соответствующих суффиксов
+        /// </summary>
+        /// <param name="x">X ячейки</param>
+        /// <param name="y">Y ячейки</param>
+        /// <param name="mouseState"></param>
         public void CheckSuffixCell(int x, int y, MouseState mouseState)
         {
-            // rectangle проверяемой ячейки
-            int pixelX = (x * BoardCell.CellWidth) + x + 1;
-            int pixelY = (y * BoardCell.CellHeight) + y + 1;
-            Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
-
-            if (CellClose(x, y))
+            if (boardSquares[x, y].SuffixClose) // если закрыта
             {
-                if (MouseSelect(x, y))
+                boardSquares[x, y].SuffixSelect = true; // ставим selectOn
+
+                if (mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    MouseSelectOFF(x, y); // обнуляем селект
+                    boardSquares[x, y].SuffixPress = true; // если нажата кнопка то ставим pressON
                 }
 
-                if (rect.Contains(mouseState.X, mouseState.Y))
+                if (boardSquares[x, y].SuffixPress && mouseState.LeftButton == ButtonState.Released) // если PressON и кнопка ненажата то открываем ячейку
                 {
-                    MouseSelectON(x, y); // если выделена то ставим selectOn
-                }
+                    boardSquares[x, y].SuffixClose = false;  // ячейка открыта
+                    boardSquares[x, y].SuffixPress = false;  // обнуляем все 
+                    boardSquares[x, y].SuffixSelect = false; // суффиксы
 
-                //////////////////////////////////////////////////////////////////////////
-
-                if (MouseSelect(x, y))
-                {
-                    if (mouseState.RightButton == ButtonState.Pressed)
-                    {
-                        FlagON(x, y);
-                    }
-                }
-
-                //////////////////////////////////////////////////////////////////////////
-
-                if (!(MouseSelect(x, y)) && MouseLBPress(x, y))
-                {
-                    MouseLBPressOFF(x, y); // обнуляем pressON если НЕвыделена
-                }
-
-                if (MouseSelect(x, y) && mouseState.LeftButton == ButtonState.Pressed)
-                {
-                    MouseLBPressON(x, y); // если нажата кнопка то ставим pressON
-                }
-
-                if (MouseLBPress(x, y) && mouseState.LeftButton == ButtonState.Released)
-                {
-                    CellCloseOFF(x, y); // ячейка открыта
-                    MouseLBPressOFF(x, y); // обнуляем все 
-                    MouseSelectOFF(x, y); // суффиксы
+                    if (boardSquares[x, y].EmptyCell) // если пустая то открываем соседнии пустые
+                        OpenEmptyCell(x, y);
                 }
             }
         }
@@ -203,85 +195,6 @@ namespace Miner
         public Rectangle GetTileRect(int x, int y)
         {
             return boardSquares[x, y].GetTileRect();
-        }
-
-        /* методы изменения суффиксов */
-        public void MouseLBPressON(int x, int y)
-        {
-            boardSquares[x, y].MouseLBPressON();
-        }
-
-        public void MouseLBPressOFF(int x, int y)
-        {
-            boardSquares[x, y].MouseLBPressOFF();
-        }
-
-        public void MouseSelectON(int x, int y)
-        {
-            boardSquares[x, y].MouseSelectON();
-        }
-
-        public void MouseSelectOFF(int x, int y)
-        {
-            boardSquares[x, y].MouseSelectOFF();
-        }
-
-        public void CellCloseON(int x, int y)
-        {
-            boardSquares[x, y].CellCloseON();
-        }
-
-        public void CellCloseOFF(int x, int y)
-        {
-            boardSquares[x, y].CellCloseOFF();
-            if (boardSquares[x, y].EmptyCell)
-                OpenEmptyCell(x, y);
-        }
-
-        public void FlagON(int x, int y)
-        {
-            boardSquares[x, y].FlagON();
-        }
-
-        public void FlagOFF(int x, int y)
-        {
-            boardSquares[x, y].FlagOFF();
-        }
-
-        public void MaybeON(int x, int y)
-        {
-            boardSquares[x, y].MaybeON();
-        }
-
-        public void MaybeOFF(int x, int y)
-        {
-            boardSquares[x, y].MaybeOFF();
-        }
-
-        /* методы проверки суффиксов */
-        public bool MouseLBPress(int x, int y)
-        {
-            return boardSquares[x, y].SuffixPress;
-        }
-
-        public bool MouseSelect(int x, int y)
-        {
-            return boardSquares[x, y].SuffixSelect;
-        }
-
-        public bool CellClose(int x, int y)
-        {
-            return boardSquares[x, y].SuffixClose;
-        }
-
-        public bool Flag(int x, int y)
-        {
-            return boardSquares[x, y].SuffixFlag;
-        }
-
-        public bool Maybe(int x, int y)
-        {
-            return boardSquares[x, y].SuffixMaybe;
         }
     }
 }

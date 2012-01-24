@@ -134,7 +134,18 @@ namespace Miner
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
-                    gameBoard.CheckSuffixCell(x, y, mouseState);
+                    gameBoard.Clear2Suffix(x, y);
+
+                    // rectangle провер€емой €чейки
+                    int pixelX = (x * BoardCell.CellWidth) + x + 1;
+                    int pixelY = (y * BoardCell.CellHeight) + y + 1;
+                    Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
+
+                    // если hover mouse вызываем проверку суффиксов €чейки
+                    if (rect.Contains(mouseState.X, mouseState.Y))
+                    {
+                        gameBoard.CheckSuffixCell(x, y, mouseState);
+                    }
                 }
             }
         }
