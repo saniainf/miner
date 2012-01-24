@@ -40,10 +40,11 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            graphics.PreferredBackBufferWidth = 800;
-            graphics.PreferredBackBufferHeight = 600;
+            gameBoard = new GameBoard(10, 15, 10);
+
+            graphics.PreferredBackBufferWidth = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);
+            graphics.PreferredBackBufferHeight = (gameBoard.GameBoardHeight * BoardCell.CellHeight) + (gameBoard.GameBoardHeight + BoardCell.Offset);
             graphics.ApplyChanges();
-            gameBoard = new GameBoard(10, 15, 20);
 
             base.Initialize();
         }
@@ -87,7 +88,7 @@ namespace Miner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.Blue);
 
             spriteBatch.Begin();
 
@@ -133,52 +134,7 @@ namespace Miner
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
-                    // rectangle провер€емой €чейки
-                    int pixelX = (x * BoardCell.CellWidth) + x + 1;
-                    int pixelY = (y * BoardCell.CellHeight) + y + 1;
-                    Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
-
-                    if (gameBoard.CellClose(x, y))
-                    {
-                        if (gameBoard.MouseSelect(x, y))
-                        {
-                            gameBoard.MouseSelectOFF(x, y); // обнул€ем селект
-                        }
-
-                        if (rect.Contains(mouseState.X, mouseState.Y))
-                        {
-                            gameBoard.MouseSelectON(x, y); // если выделена то ставим selectOn
-                        }
-
-                        //////////////////////////////////////////////////////////////////////////
-
-                        if (gameBoard.MouseSelect(x, y))
-                        {
-                            if (mouseState.RightButton == ButtonState.Pressed)
-                            {
-                                gameBoard.FlagON(x, y);
-                            }
-                        }
-
-                        //////////////////////////////////////////////////////////////////////////
-
-                        if (!(gameBoard.MouseSelect(x, y)) && gameBoard.MouseLBPress(x, y))
-                        {
-                            gameBoard.MouseLBPressOFF(x, y); // обнул€ем pressON если Ќ≈выделена
-                        }
-
-                        if (gameBoard.MouseSelect(x, y) && mouseState.LeftButton == ButtonState.Pressed)
-                        {
-                            gameBoard.MouseLBPressON(x, y); // если нажата кнопка то ставим pressON
-                        }
-
-                        if (gameBoard.MouseLBPress(x, y) && mouseState.LeftButton == ButtonState.Released)
-                        {
-                            gameBoard.CellCloseOFF(x, y); // €чейка открыта
-                            gameBoard.MouseLBPressOFF(x, y); // обнул€ем все 
-                            gameBoard.MouseSelectOFF(x, y); // суффиксы
-                        }
-                    }
+                    gameBoard.CheckSuffixCell(x, y, mouseState);
                 }
             }
         }

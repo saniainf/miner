@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace Miner
 {
@@ -102,18 +103,22 @@ namespace Miner
             }
         }
 
+        /// <summary>
+        /// открыть все пустые ячейки рядом с начальной
+        /// </summary>
+        /// <param name="startX">X начальноя ячейки</param>
+        /// <param name="startY">Y начальной ячейки</param>
         public void OpenEmptyCell(int startX, int startY)
         {
-            List<Vector2> ListCells = new List<Vector2>();
-            ListCells.Add(new Vector2(startX, startY));
-            int Index = 0;
-            int preIndex;
+            List<Point> ListCells = new List<Point>();
+            ListCells.Add(new Point(startX, startY));
+            int preCount;
 
             do
             {
-                preIndex = Index;
-                int X = (int)ListCells[Index].X;
-                int Y = (int)ListCells[Index].Y;
+                preCount = ListCells.Count - 1;
+                int X = (int)ListCells[ListCells.Count - 1].X;
+                int Y = (int)ListCells[ListCells.Count - 1].Y;
 
                 for (int miniX = X - 1; miniX <= X + 1; miniX++)
                 {
@@ -125,17 +130,68 @@ namespace Miner
                             {
                                 if (boardSquares[miniX, miniY].EmptyCell)
                                 {
-                                    ListCells.Add(new Vector2(miniX, miniY));
-                                    Index += 1;
+                                    ListCells.Add(new Point(miniX, miniY));
                                 }
-                                CellCloseOFF(miniX, miniY);
+                                boardSquares[miniX, miniY].CellCloseOFF();
+                                if (boardSquares[miniX, miniY].EmptyCell)
+                                    OpenEmptyCell(miniX, miniY);
                                 MouseLBPressOFF(miniX, miniY);
                                 MouseSelectOFF(miniX, miniY);
                             }
                         }
                     }
                 }
-            } while (Index != preIndex);
+            } while (ListCells.Count - 1 != preCount);
+        }
+
+        public void CheckSuffixCell(int x, int y, MouseState mouseState)
+        {
+            // rectangle проверяемой ячейки
+            int pixelX = (x * BoardCell.CellWidth) + x + 1;
+            int pixelY = (y * BoardCell.CellHeight) + y + 1;
+            Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
+
+            if (CellClose(x, y))
+            {
+                if (MouseSelect(x, y))
+                {
+                    MouseSelectOFF(x, y); // обнуляем селект
+                }
+
+                if (rect.Contains(mouseState.X, mouseState.Y))
+                {
+                    MouseSelectON(x, y); // если выделена то ставим selectOn
+                }
+
+                //////////////////////////////////////////////////////////////////////////
+
+                if (MouseSelect(x, y))
+                {
+                    if (mouseState.RightButton == ButtonState.Pressed)
+                    {
+                        FlagON(x, y);
+                    }
+                }
+
+                //////////////////////////////////////////////////////////////////////////
+
+                if (!(MouseSelect(x, y)) && MouseLBPress(x, y))
+                {
+                    MouseLBPressOFF(x, y); // обнуляем pressON если НЕвыделена
+                }
+
+                if (MouseSelect(x, y) && mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    MouseLBPressON(x, y); // если нажата кнопка то ставим pressON
+                }
+
+                if (MouseLBPress(x, y) && mouseState.LeftButton == ButtonState.Released)
+                {
+                    CellCloseOFF(x, y); // ячейка открыта
+                    MouseLBPressOFF(x, y); // обнуляем все 
+                    MouseSelectOFF(x, y); // суффиксы
+                }
+            }
         }
 
         /// <summary>
