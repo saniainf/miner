@@ -84,7 +84,7 @@ namespace Miner
 
             if (_suffixClose)
             {
-                y = SheetSellSize * 11 + Offset;
+                y = SheetSellSize * (int)TypeCell.Close + Offset;
 
                 if (_suffixPress)
                 {
@@ -93,14 +93,9 @@ namespace Miner
 
                 else if (_suffixSelect)
                 {
-                    y = SheetSellSize * 12 + Offset;
+                    y = SheetSellSize * (int)TypeCell.Select + Offset;
                 }
             }
-
-
-
-
-
             return new Rectangle(x, y, CellWidth, CellHeight);
         }
 
