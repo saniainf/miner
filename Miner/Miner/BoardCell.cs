@@ -46,6 +46,19 @@ namespace Miner
         public bool SuffixPress
         {
             get { return _suffixPress; }
+
+            set
+            {
+                if (value == true && !_suffixPress && _suffixClose)
+                {
+                    _suffixPress = true;
+                }
+
+                if (value == false && _suffixPress && _suffixClose)
+                {
+                    _suffixPress = false;
+                }
+            }
         }
 
         /// <summary>
@@ -54,6 +67,19 @@ namespace Miner
         public bool SuffixClose
         {
             get { return _suffixClose; }
+
+            set
+            {
+                if (value == true)
+                {
+                    _suffixClose = true;
+                }
+
+                if (value == false && _suffixClose)
+                {
+                    _suffixClose = false;
+                }
+            }
         }
 
         /// <summary>
@@ -62,6 +88,19 @@ namespace Miner
         public bool SuffixSelect
         {
             get { return _suffixSelect; }
+
+            set
+            {
+                if (value == true && !_suffixSelect && _suffixClose)
+                {
+                    _suffixSelect = true;
+                }
+
+                if (value == false && _suffixSelect && _suffixClose)
+                {
+                    _suffixSelect = false;
+                }
+            }
         }
 
         /// <summary>
