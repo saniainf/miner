@@ -208,57 +208,5 @@ namespace Miner
         {
             type = (TypeCell)count;
         }
-
-        /* методы изменения суффиксов 
-        public void MouseLBPressON()
-        {
-            _suffixPress = true;
-        }
-
-        public void MouseLBPressOFF()
-        {
-            _suffixPress = false;
-        }
-        
-        public void MouseSelectON()
-        {
-            _suffixSelect = true;
-        }
-
-        public void MouseSelectOFF()
-        {
-            _suffixSelect = false;
-        }
-
-        public void CellCloseON()
-        {
-            _suffixClose = true;
-        }
-
-        public void CellCloseOFF()
-        {
-            _suffixClose = false;
-        }
-
-        public void FlagON()
-        {
-            _suffixFlag = true;
-        }
-
-        public void FlagOFF()
-        {
-            _suffixFlag = false;
-        }
-
-        public void MaybeON()
-        {
-            _suffixMaybe = true;
-        }
-
-        public void MaybeOFF()
-        {
-            _suffixMaybe = false;
-        }
-        */
     }
 }
