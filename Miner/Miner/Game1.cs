@@ -43,7 +43,7 @@ namespace Miner
             graphics.PreferredBackBufferWidth = 800;
             graphics.PreferredBackBufferHeight = 600;
             graphics.ApplyChanges();
-            gameBoard = new GameBoard(20, 16);
+            gameBoard = new GameBoard(10, 15, 20);
 
             base.Initialize();
         }
@@ -87,7 +87,7 @@ namespace Miner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
 
@@ -133,42 +133,52 @@ namespace Miner
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
-                    //////////////////////////////////////////////////////////////////////////
                     // rectangle провер€емой €чейки
-                    //////////////////////////////////////////////////////////////////////////
                     int pixelX = (x * BoardCell.CellWidth) + x + 1;
                     int pixelY = (y * BoardCell.CellHeight) + y + 1;
                     Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
-                    //////////////////////////////////////////////////////////////////////////
 
-                    if (gameBoard.MouseSelect(x, y))
+                    if (gameBoard.CellClose(x, y))
                     {
-                        gameBoard.MouseSelectOFF(x, y); // обнул€ем селект
+                        if (gameBoard.MouseSelect(x, y))
+                        {
+                            gameBoard.MouseSelectOFF(x, y); // обнул€ем селект
+                        }
+
+                        if (rect.Contains(mouseState.X, mouseState.Y))
+                        {
+                            gameBoard.MouseSelectON(x, y); // если выделена то ставим selectOn
+                        }
+
+                        //////////////////////////////////////////////////////////////////////////
+
+                        if (gameBoard.MouseSelect(x, y))
+                        {
+                            if (mouseState.RightButton == ButtonState.Pressed)
+                            {
+                                gameBoard.FlagON(x, y);
+                            }
+                        }
+
+                        //////////////////////////////////////////////////////////////////////////
+
+                        if (!(gameBoard.MouseSelect(x, y)) && gameBoard.MouseLBPress(x, y))
+                        {
+                            gameBoard.MouseLBPressOFF(x, y); // обнул€ем pressON если Ќ≈выделена
+                        }
+
+                        if (gameBoard.MouseSelect(x, y) && mouseState.LeftButton == ButtonState.Pressed)
+                        {
+                            gameBoard.MouseLBPressON(x, y); // если нажата кнопка то ставим pressON
+                        }
+
+                        if (gameBoard.MouseLBPress(x, y) && mouseState.LeftButton == ButtonState.Released)
+                        {
+                            gameBoard.CellCloseOFF(x, y); // €чейка открыта
+                            gameBoard.MouseLBPressOFF(x, y); // обнул€ем все 
+                            gameBoard.MouseSelectOFF(x, y); // суффиксы
+                        }
                     }
-
-                    if (rect.Contains(mouseState.X, mouseState.Y))
-                    {
-                        gameBoard.MouseSelectON(x, y); // если выделена то ставим selectOn
-                    }
-
-                    //////////////////////////////////////////////////////////////////////////
-
-                    if (!(gameBoard.MouseSelect(x,y)) && gameBoard.MouseLBPress(x, y))
-                    {
-                        gameBoard.MouseLBPressOFF(x, y); // обнул€ем pressON если невыделена
-                    }
-
-                    if (gameBoard.MouseSelect(x, y) && mouseState.LeftButton == ButtonState.Pressed)
-                    {
-                        gameBoard.MouseLBPressON(x, y); // если нажата кнопка то ставим pressON
-                    }
-
-                    if (gameBoard.MouseLBPress(x, y) && mouseState.LeftButton == ButtonState.Released)
-                    {
-                        gameBoard.CellCloseOFF(x, y);
-                    }
-
-                    //////////////////////////////////////////////////////////////////////////
                 }
             }
         }

@@ -13,28 +13,91 @@ namespace Miner
 
         private BoardCell[,] boardSquares;
 
-        public GameBoard(int width, int height)
+        public int NumberMines;
+
+        Random rnd = new Random();
+
+        /// <summary>
+        /// Игровое поле
+        /// </summary>
+        /// <param name="width">высота в ячейках</param>
+        /// <param name="height">ширина в ячейуах</param>
+        /// <param name="numMines">количество мин</param>
+        public GameBoard(int width, int height, int numMines)
         {
             GameBoardWidth = width;
             GameBoardHeight = height;
+            NumberMines = numMines;
 
             boardSquares = new BoardCell[width, height];
 
-            RandomBoard();
+            ClearBoard();
+            PlaceMines();
+            NumberInCell();
         }
 
         /// <summary>
-        /// заполнение игрового поля
+        /// просто очистка всего поля
         /// </summary>
-        private void RandomBoard()
+        private void ClearBoard()
         {
             for (int x = 0; x < GameBoardWidth; x++)
             {
                 for (int y = 0; y < GameBoardHeight; y++)
                 {
-                    boardSquares[x, y] = new BoardCell(BoardCell.TypeCell.Mine);
+                    boardSquares[x, y] = new BoardCell(BoardCell.TypeCell.Empty);
+                }
+            }
+        }
 
-                    // TODO: добавить обработчик заполнения игрового поля, пока везде мины
+        /// <summary>
+        /// размещение мин на поле
+        /// </summary>
+        private void PlaceMines()
+        {
+            for (int i = NumberMines; i > 0; i--)
+            {
+                int x = rnd.Next(GameBoardWidth);
+                int y = rnd.Next(GameBoardHeight);
+
+                if (!boardSquares[x, y].MineHave)
+                    boardSquares[x, y].AddMine();
+                else i++;
+            }
+        }
+
+        /// <summary>
+        /// установка количества мин вокруг ячейки
+        /// </summary>
+        private void NumberInCell()
+        {
+            for (int x = 0; x < GameBoardWidth; x++)
+            {
+                for (int y = 0; y < GameBoardHeight; y++)
+                {
+                    int count = 0;
+                    //////////////////////////////////////////////////////////////////////////
+                    if (!boardSquares[x,y].MineHave)
+                    {
+	                    for (int miniX = x - 1; miniX <= x + 1; miniX++)
+	                    {
+	                        for (int miniY = y - 1; miniY <= y + 1; miniY++)
+	                        {
+	                            if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight)
+	                            {
+	                                if (boardSquares[miniX, miniY].MineHave)
+	                                {
+	                                    count = count + 1;
+	                                }
+	                            }
+	                        }
+	                    }
+                    }
+                    //////////////////////////////////////////////////////////////////////////
+                    if (count > 0)
+                    {
+                        boardSquares[x, y].AddNumber(count);
+                    }
                 }
             }
         }
@@ -81,6 +144,26 @@ namespace Miner
             boardSquares[x, y].CellCloseOFF();
         }
 
+        public void FlagON(int x, int y)
+        {
+            boardSquares[x, y].FlagON();
+        }
+
+        public void FlagOFF(int x, int y)
+        {
+            boardSquares[x, y].FlagOFF();
+        }
+
+        public void MaybeON(int x, int y)
+        {
+            boardSquares[x, y].MaybeON();
+        }
+
+        public void MaybeOFF(int x, int y)
+        {
+            boardSquares[x, y].MaybeOFF();
+        }
+
         /* методы проверки суффиксов */
         public bool MouseLBPress(int x, int y)
         {
@@ -94,7 +177,17 @@ namespace Miner
 
         public bool CellClose(int x, int y)
         {
-            return boardSquares[x, y].SuffixClose; 
+            return boardSquares[x, y].SuffixClose;
+        }
+
+        public bool Flag(int x, int y)
+        {
+            return boardSquares[x, y].SuffixFlag;
+        }
+
+        public bool Maybe(int x, int y)
+        {
+            return boardSquares[x, y].SuffixMaybe;
         }
     }
 }

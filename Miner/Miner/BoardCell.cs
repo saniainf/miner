@@ -22,7 +22,8 @@ namespace Miner
             Flag,
             Mine,
             Close,
-            Select
+            Select,
+            Maybe
         }
         private TypeCell type;
 
@@ -36,6 +37,8 @@ namespace Miner
         private bool _suffixPress;
         private bool _suffixClose;
         private bool _suffixSelect;
+        private bool _suffixFlag;
+        private bool _suffixMaybe;
 
         /// <summary>
         /// суффикс состояния нажатия на ячейку
@@ -62,15 +65,44 @@ namespace Miner
         }
 
         /// <summary>
+        /// суффикс флажка
+        /// </summary>
+        public bool SuffixFlag
+        {
+            get { return _suffixFlag; }
+        }
+
+        /// <summary>
+        /// суффикс вопроса
+        /// </summary>
+        public bool SuffixMaybe
+        {
+            get { return _suffixMaybe; }
+        }
+
+        public bool MineHave
+        {
+            get
+            {
+                if (type == TypeCell.Mine)
+                    return true;
+                else
+                    return false;
+            }
+        }
+
+        /// <summary>
         /// ячейка игрового поля
         /// </summary>
         /// <param name="type">тип ячейки</param>
         public BoardCell(TypeCell type)
         {
             this.type = type;
-            _suffixClose = true;
+            _suffixClose = false;
             _suffixPress = false;
             _suffixSelect = false;
+            _suffixFlag = false;
+            _suffixMaybe = false;
         }
 
         /// <summary>
@@ -86,17 +118,39 @@ namespace Miner
             {
                 y = SheetSellSize * (int)TypeCell.Close + Offset;
 
-                if (_suffixPress)
+                if (_suffixFlag)
                 {
-                    y = Offset;
+                    y = SheetSellSize * (int)TypeCell.Flag + Offset;
                 }
 
-                else if (_suffixSelect)
+                if (_suffixMaybe)
+                {
+                    y = SheetSellSize * (int)TypeCell.Maybe + Offset;
+                }
+
+                if (_suffixPress && !(_suffixFlag || _suffixMaybe))
+                {
+                    y = SheetSellSize * (int)TypeCell.Empty + Offset;
+                }
+
+                else if (_suffixSelect && !(_suffixFlag || _suffixMaybe))
                 {
                     y = SheetSellSize * (int)TypeCell.Select + Offset;
                 }
             }
             return new Rectangle(x, y, CellWidth, CellHeight);
+        }
+
+        /* установка мины */
+        public void AddMine()
+        {
+            type = TypeCell.Mine;
+        }
+
+        /* установка цифры количесва мин вокруг ячейки */
+        public void AddNumber(int count)
+        {
+            type = (TypeCell)count;
         }
 
         /* методы изменения суффиксов */
@@ -109,7 +163,7 @@ namespace Miner
         {
             _suffixPress = false;
         }
-
+        
         public void MouseSelectON()
         {
             _suffixSelect = true;
@@ -128,6 +182,26 @@ namespace Miner
         public void CellCloseOFF()
         {
             _suffixClose = false;
+        }
+
+        public void FlagON()
+        {
+            _suffixFlag = true;
+        }
+
+        public void FlagOFF()
+        {
+            _suffixFlag = false;
+        }
+
+        public void MaybeON()
+        {
+            _suffixMaybe = true;
+        }
+
+        public void MaybeOFF()
+        {
+            _suffixMaybe = false;
         }
     }
 }
