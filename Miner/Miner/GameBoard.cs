@@ -123,38 +123,23 @@ namespace Miner
         /// <param name="startY">Y начальной ячейки</param>
         public void OpenEmptyCell(int startX, int startY)
         {
-            List<Point> ListCells = new List<Point>();
-            ListCells.Add(new Point(startX, startY));
-            int preCount;
-
-            do
+            for (int miniX = startX - 1; miniX <= startX + 1; miniX++) // цикл по X квадратика
             {
-                preCount = ListCells.Count - 1;
-                int X = (int)ListCells[ListCells.Count - 1].X;
-                int Y = (int)ListCells[ListCells.Count - 1].Y;
-
-                for (int miniX = X - 1; miniX <= X + 1; miniX++)
+                for (int miniY = startY - 1; miniY <= startY + 1; miniY++) // цикл по Y квадратика
                 {
-                    for (int miniY = Y - 1; miniY <= Y + 1; miniY++)
+                    if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight) // если невыходит за пределы поля
                     {
-                        if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight)
+                        if (boardSquares[miniX, miniY].SuffixClose) // если закрыта
                         {
-                            if (boardSquares[miniX, miniY].SuffixClose)
-                            {
-                                if (boardSquares[miniX, miniY].EmptyCell)
-                                {
-                                    ListCells.Add(new Point(miniX, miniY));
-                                }
-                                boardSquares[miniX, miniY].SuffixClose = false;
-                                Clear2Suffix(miniX, miniY);
-                                // TODO: разобраться с рекурсией
-                                if (boardSquares[miniX, miniY].EmptyCell)
-                                    OpenEmptyCell(miniX, miniY);
-                            }
+                            boardSquares[miniX, miniY].SuffixClose = false; // открыть
+                            Clear2Suffix(miniX, miniY); // обнулить суффиксы
+                            // TODO: разобраться с рекурсией
+                            if (boardSquares[miniX, miniY].EmptyCell) // если пустая то вызвать для нее OpenEmptyCell
+                                OpenEmptyCell(miniX, miniY);
                         }
                     }
                 }
-            } while (ListCells.Count - 1 != preCount);
+            }
         }
 
         /// <summary>

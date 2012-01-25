@@ -40,7 +40,7 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            gameBoard = new GameBoard(10, 15, 10);
+            gameBoard = new GameBoard(20, 25, 30);
 
             graphics.PreferredBackBufferWidth = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);
             graphics.PreferredBackBufferHeight = (gameBoard.GameBoardHeight * BoardCell.CellHeight) + (gameBoard.GameBoardHeight + BoardCell.Offset);
