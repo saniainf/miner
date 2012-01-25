@@ -110,7 +110,7 @@ namespace Miner
         /// <param name="y">Y ячейки</param>
         public void Clear2Suffix(int x, int y)
         {
-            if (boardSquares[x, y].SuffixPress && !boardSquares[x, y].SuffixSelect) // недаст убрать PressOn пока ячейка выделена
+            if (boardSquares[x, y].SuffixPress && !boardSquares[x, y].SuffixSelect) // недаст убрать PressOn пока ячейка Select
                 boardSquares[x, y].SuffixPress = false;
             if (boardSquares[x, y].SuffixSelect)
                 boardSquares[x, y].SuffixSelect = false;
@@ -146,10 +146,10 @@ namespace Miner
                                     ListCells.Add(new Point(miniX, miniY));
                                 }
                                 boardSquares[miniX, miniY].SuffixClose = false;
+                                Clear2Suffix(miniX, miniY);
                                 // TODO: разобраться с рекурсией
                                 if (boardSquares[miniX, miniY].EmptyCell)
                                     OpenEmptyCell(miniX, miniY);
-                                Clear2Suffix(miniX, miniY);
                             }
                         }
                     }
