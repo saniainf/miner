@@ -206,11 +206,13 @@ namespace Miner
         /// <param name="y">Y ячейка</param>
         public void WinGameOver(int x, int y)
         {
+            // проиграл :=(
             if (boardSquares[x,y].MineHave && !boardSquares[x,y].SuffixClose)
             {
                 ClearBoard();
             }
 
+            // выиграл :=)
             if (NumberMines == NumberCells)
             {
                 ClearBoard();

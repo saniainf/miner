@@ -22,8 +22,16 @@ namespace Miner
         Texture2D TileSheet;
 
         GameBoard gameBoard;
+        Controls controls;
 
         Rectangle BackgroundCell = new Rectangle(0, 330, 22, 22);
+        Rectangle BackgroundRectangle = new Rectangle(30, 0, 400, 400);
+        Rectangle gameBoardRectangle;
+        Rectangle ScreenRectangle;
+
+        Point Offset;
+        Point ControlsBottom;
+        Point SpaceOverGameBoard = new Point(10, 80);
 
         public Game1()
         {
@@ -40,11 +48,23 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            gameBoard = new GameBoard(20, 25, 10);
+            gameBoard = new GameBoard(9, 9, 10);
+            controls = new Controls();
 
-            graphics.PreferredBackBufferWidth = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);
-            graphics.PreferredBackBufferHeight = (gameBoard.GameBoardHeight * BoardCell.CellHeight) + (gameBoard.GameBoardHeight + BoardCell.Offset);
+            gameBoardRectangle.Width = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);
+            gameBoardRectangle.Height = (gameBoard.GameBoardHeight * BoardCell.CellHeight) + (gameBoard.GameBoardHeight + BoardCell.Offset);
+
+            graphics.PreferredBackBufferWidth = gameBoardRectangle.Width + SpaceOverGameBoard.X;
+            graphics.PreferredBackBufferHeight = gameBoardRectangle.Height + SpaceOverGameBoard.Y;
             graphics.ApplyChanges();
+
+            ScreenRectangle = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+
+            Offset.X = (ScreenRectangle.Width - gameBoardRectangle.Width) / 2;
+            Offset.Y = (ScreenRectangle.Height - gameBoardRectangle.Height) / 2;
+
+            ControlsBottom.X = graphics.PreferredBackBufferWidth / 2;
+            ControlsBottom.Y = (graphics.PreferredBackBufferHeight - (SpaceOverGameBoard.Y / 4)) - (ControlsPiece.ControlsHeight / 2);
 
             base.Initialize();
         }
@@ -92,15 +112,17 @@ namespace Miner
 
             spriteBatch.Begin();
 
+            spriteBatch.Draw(TileSheet, ScreenRectangle, BackgroundRectangle, Color.White);
+
             for (int x = 0; x < gameBoard.GameBoardWidth; x++)
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
                     //////////////////////////////////////////////////////////////////////////
-                    // отрисовка бэкграунда
+                    // отрисовка бэкграунда €чеек
                     //////////////////////////////////////////////////////////////////////////
-                    int pixelX = (x * BackgroundCell.Width) - x;
-                    int pixelY = (y * BackgroundCell.Height) - y;
+                    int pixelX = ((x * BackgroundCell.Width) - x) + Offset.X;
+                    int pixelY = ((y * BackgroundCell.Height) - y) + Offset.Y;
 
                     spriteBatch.Draw(TileSheet,
                         new Rectangle(pixelX, pixelY, BackgroundCell.Width, BackgroundCell.Height),
@@ -109,14 +131,36 @@ namespace Miner
                     //////////////////////////////////////////////////////////////////////////
                     // отрисовка €чеек 
                     //////////////////////////////////////////////////////////////////////////
-                    pixelX = (x * BoardCell.CellWidth) + x + 1;
-                    pixelY = (y * BoardCell.CellHeight) + y + 1;
+                    pixelX = ((x * BoardCell.CellWidth) + x + 1) + Offset.X;
+                    pixelY = ((y * BoardCell.CellHeight) + y + 1) + Offset.Y;
 
                     spriteBatch.Draw(TileSheet,
                         new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight),
                         gameBoard.GetTileRect(x, y), Color.White);
                     //////////////////////////////////////////////////////////////////////////
                 }
+            }
+
+            for (int i = 0; i < controls.CountControls(); i++)
+            {
+                int pixelX = 0;
+                int pixelY = 0;
+
+                switch (controls.GetName(i))
+                {
+                    case "New":
+                        pixelX = ControlsBottom.X - (5 + ControlsPiece.ControlsWidth);
+                        pixelY = ControlsBottom.Y;
+                        break;
+                    case "Options":
+                        pixelX = ControlsBottom.X + 5;
+                        pixelY = ControlsBottom.Y;
+                        break;
+                }
+
+                spriteBatch.Draw(TileSheet,
+                    new Rectangle(pixelX, pixelY, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight),
+                    controls.GetControlRect(i), Color.White);
             }
 
             spriteBatch.End();
@@ -139,8 +183,8 @@ namespace Miner
                     gameBoard.Clear2Suffix(x, y);
 
                     // rectangle провер€емой €чейки
-                    int pixelX = (x * BoardCell.CellWidth) + x + 1;
-                    int pixelY = (y * BoardCell.CellHeight) + y + 1;
+                    int pixelX = ((x * BoardCell.CellWidth) + x + 1) + Offset.X;
+                    int pixelY = ((y * BoardCell.CellHeight) + y + 1) + Offset.Y;
                     Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
 
                     // если hover mouse вызываем проверку суффиксов €чейки
@@ -148,6 +192,33 @@ namespace Miner
                     {
                         gameBoard.CheckSuffixCell(x, y, mouseState);
                     }
+                }
+            }
+
+            for (int i = 0; i < controls.CountControls(); i++)
+            {
+                int pixelX = 0;
+                int pixelY = 0;
+
+                controls.Clear2Suffix(i);
+
+                switch (controls.GetName(i))
+                {
+                    case "New":
+                        pixelX = ControlsBottom.X - (5 + ControlsPiece.ControlsWidth);
+                        pixelY = ControlsBottom.Y;
+                        break;
+                    case "Options":
+                        pixelX = ControlsBottom.X + 5;
+                        pixelY = ControlsBottom.Y;
+                        break;
+                }
+
+                Rectangle rect = new Rectangle(pixelX, pixelY, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight);
+
+                if (rect.Contains(mouseState.X, mouseState.Y))
+                {
+                    controls.CheckSuffixCell(i, mouseState);
                 }
             }
         }
