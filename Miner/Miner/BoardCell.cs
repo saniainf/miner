@@ -23,7 +23,9 @@ namespace Miner
             Mine,
             Close,
             Select,
-            Maybe
+            Maybe,
+            MaybeSelect,
+            FlagSelect
         }
         private TypeCell type;
 
@@ -104,22 +106,6 @@ namespace Miner
         }
 
         /// <summary>
-        /// суффикс флажка
-        /// </summary>
-        public bool SuffixFlag
-        {
-            get { return _suffixFlag; }
-        }
-
-        /// <summary>
-        /// суффикс вопроса
-        /// </summary>
-        public bool SuffixMaybe
-        {
-            get { return _suffixMaybe; }
-        }
-
-        /// <summary>
         /// проверка наличия мины
         /// </summary>
         public bool MineHave
@@ -179,9 +165,19 @@ namespace Miner
                     y = SheetSellSize * (int)TypeCell.Flag + Offset;
                 }
 
+                if (_suffixFlag && _suffixSelect)
+                {
+                    y = SheetSellSize * (int)TypeCell.FlagSelect + Offset;
+                }
+
                 if (_suffixMaybe)
                 {
                     y = SheetSellSize * (int)TypeCell.Maybe + Offset;
+                }
+
+                if (_suffixMaybe && _suffixSelect)
+                {
+                    y = SheetSellSize * (int)TypeCell.MaybeSelect + Offset;
                 }
 
                 if (_suffixPress && !(_suffixFlag || _suffixMaybe))
@@ -197,16 +193,49 @@ namespace Miner
             return new Rectangle(x, y, CellWidth, CellHeight);
         }
 
-        /* установка мины */
+        /// <summary>
+        /// устанавливает мину в ячейку
+        /// </summary>
         public void AddMine()
         {
             type = TypeCell.Mine;
         }
 
-        /* смена типа ячейки на цифру количесва мин вокруг ячейки */
+        /// <summary>
+        /// смена типа ячейки на цифру количесва мин вокруг ячейки
+        /// </summary>
+        /// <param name="count">количество мин вокруг</param>
         public void AddNumber(int count)
         {
             type = (TypeCell)count;
+        }
+
+        /// <summary>
+        /// циклично изменяет флажок - вопрос - пусто
+        /// </summary>
+        public void ChangeFlag()
+        {
+            if (_suffixClose && _suffixSelect)
+            {
+                if (!_suffixFlag && !_suffixMaybe)
+                {
+                    _suffixFlag = true;
+                    return;
+                }
+
+                if (_suffixFlag)
+                {
+                    _suffixFlag = false;
+                    _suffixMaybe = true;
+                    return;
+                }
+
+                if (_suffixMaybe)
+                {
+                    _suffixMaybe = false;
+                    return;
+                }
+            }
         }
     }
 }

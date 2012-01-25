@@ -40,7 +40,7 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            gameBoard = new GameBoard(20, 25, 30);
+            gameBoard = new GameBoard(20, 25, 10);
 
             graphics.PreferredBackBufferWidth = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);
             graphics.PreferredBackBufferHeight = (gameBoard.GameBoardHeight * BoardCell.CellHeight) + (gameBoard.GameBoardHeight + BoardCell.Offset);
@@ -77,7 +77,7 @@ namespace Miner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            HandleMouseInput(Mouse.GetState());
+            GameBoardUpdate(Mouse.GetState());
 
             base.Update(gameTime);
         }
@@ -128,12 +128,14 @@ namespace Miner
         /// update инпута
         /// </summary>
         /// <param name="mouseState"></param>
-        private void HandleMouseInput(MouseState mouseState)
+        private void GameBoardUpdate(MouseState mouseState)
         {
             for (int x = 0; x < gameBoard.GameBoardWidth; x++)
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
+                    gameBoard.WinGameOver(x, y);
+
                     gameBoard.Clear2Suffix(x, y);
 
                     // rectangle провер€емой €чейки

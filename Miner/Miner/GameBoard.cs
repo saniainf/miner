@@ -15,6 +15,9 @@ namespace Miner
         private BoardCell[,] boardSquares;
 
         public int NumberMines;
+        int NumberCells;
+
+        bool MouseRightButton = true;
 
         Random rnd = new Random();
 
@@ -29,6 +32,7 @@ namespace Miner
             GameBoardWidth = width;
             GameBoardHeight = height;
             NumberMines = numMines;
+            NumberCells = GameBoardHeight * GameBoardWidth;
 
             boardSquares = new BoardCell[width, height];
 
@@ -132,6 +136,7 @@ namespace Miner
                         if (boardSquares[miniX, miniY].SuffixClose) // если закрыта
                         {
                             boardSquares[miniX, miniY].SuffixClose = false; // открыть
+                            NumberCells--; // удаляем из счетчика ячеек
                             Clear2Suffix(miniX, miniY); // обнулить суффиксы
                             // TODO: разобраться с рекурсией
                             if (boardSquares[miniX, miniY].EmptyCell) // если пустая то вызвать для нее OpenEmptyCell
@@ -164,9 +169,21 @@ namespace Miner
                     boardSquares[x, y].SuffixClose = false;  // ячейка открыта
                     boardSquares[x, y].SuffixPress = false;  // обнуляем все 
                     boardSquares[x, y].SuffixSelect = false; // суффиксы
+                    NumberCells--; // удаляем из счетчика ячеек
 
-                    if (boardSquares[x, y].EmptyCell) // если пустая то открываем соседнии пустые
+                    if (boardSquares[x, y].EmptyCell) // если пустая то открываем соседние пустые
                         OpenEmptyCell(x, y);
+                }
+
+                if (mouseState.RightButton == ButtonState.Pressed && MouseRightButton)
+                {
+                    boardSquares[x, y].ChangeFlag();
+                    MouseRightButton = false;
+                }
+
+                if (mouseState.RightButton == ButtonState.Released)
+                {
+                    MouseRightButton = true;
                 }
             }
         }
@@ -180,6 +197,24 @@ namespace Miner
         public Rectangle GetTileRect(int x, int y)
         {
             return boardSquares[x, y].GetTileRect();
+        }
+
+        /// <summary>
+        /// проверка Выиграл / Проиграл
+        /// </summary>
+        /// <param name="x">X ячейка</param>
+        /// <param name="y">Y ячейка</param>
+        public void WinGameOver(int x, int y)
+        {
+            if (boardSquares[x,y].MineHave && !boardSquares[x,y].SuffixClose)
+            {
+                ClearBoard();
+            }
+
+            if (NumberMines == NumberCells)
+            {
+                ClearBoard();
+            }
         }
     }
 }
