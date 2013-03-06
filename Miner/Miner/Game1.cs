@@ -48,7 +48,7 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            gameBoard = new GameBoard(20, 20, 10);
+            gameBoard = new GameBoard(30, 20, 50);
             controls = new Controls();
 
             gameBoardRectangle.Width = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);

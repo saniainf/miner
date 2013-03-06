@@ -209,13 +209,13 @@ namespace Miner
             // проиграл :=(
             if (boardSquares[x,y].MineHave && !boardSquares[x,y].SuffixClose)
             {
-                ClearBoard();
+                //ClearBoard();
             }
 
             // выиграл :=)
             if (NumberMines == NumberCells)
             {
-                ClearBoard();
+                //ClearBoard();
             }
         }
     }
