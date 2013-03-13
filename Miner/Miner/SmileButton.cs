@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace Miner
 {
@@ -14,6 +15,8 @@ namespace Miner
 
         private int pixelX;
         private int pixelY;
+
+        public string Name;
 
         /// <summary>
         /// суффикс состояния нажатия на кнопку
@@ -35,5 +38,35 @@ namespace Miner
                 }
             }
         }
+
+        /// <summary>
+        /// элемент управления
+        /// </summary>
+        /// <param name="x">X в текстуре</param>
+        /// <param name="y">Y в текстуре</param>
+        public SmileButton (int x, int y, string name)
+        {
+            pixelX = x;
+            pixelY = y;
+            Name = name;
+            _suffixPress = false;
+        }
+
+        public Rectangle GetSmileRect()
+        {
+            int x = pixelX;
+            int y = pixelY;
+
+            if (_suffixPress)
+                y = y + SmileHeight;
+
+            return new Rectangle(x, y, SmileWidth, SmileHeight);
+        }
+
+        public string GetName()
+        {
+            return Name;
+        }
+    }
     }
 }
