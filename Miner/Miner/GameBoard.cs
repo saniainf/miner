@@ -108,7 +108,7 @@ namespace Miner
         }
 
         /// <summary>
-        /// обнуление 2 суффиксов ячейки, Press & Select
+        /// обнуление 2 суффиксов ячейки Press Select
         /// </summary>
         /// <param name="x">X ячейки</param>
         /// <param name="y">Y ячейки</param>
@@ -133,7 +133,7 @@ namespace Miner
                 {
                     if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight) // если невыходит за пределы поля
                     {
-                        if (boardSquares[miniX, miniY].SuffixClose) // если закрыта
+                        if (boardSquares[miniX, miniY].SuffixClose && !boardSquares[miniX,miniY].SuffixFlag) // если закрыта
                         {
                             boardSquares[miniX, miniY].SuffixClose = false; // открыть
                             NumberCells--; // удаляем из счетчика ячеек
@@ -159,9 +159,9 @@ namespace Miner
             {
                 boardSquares[x, y].SuffixSelect = true; // ставим selectOn
 
-                if (mouseState.LeftButton == ButtonState.Pressed)
+                if (mouseState.LeftButton == ButtonState.Pressed && !boardSquares[x,y].SuffixFlag)
                 {
-                    boardSquares[x, y].SuffixPress = true; // если нажата кнопка то ставим pressON
+                    boardSquares[x, y].SuffixPress = true; // если нажата кнопка и нет флажка то ставим pressON
                 }
 
                 if (boardSquares[x, y].SuffixPress && mouseState.LeftButton == ButtonState.Released) // если PressON и кнопка ненажата то открываем ячейку

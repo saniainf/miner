@@ -25,13 +25,13 @@ namespace Miner
         Controls controls;
 
         Rectangle BackgroundCell = new Rectangle(0, 330, 22, 22);
-        Rectangle BackgroundRectangle = new Rectangle(30, 0, 400, 400);
+        Rectangle BackgroundRectangle = new Rectangle(31, 1, 100, 100);
         Rectangle gameBoardRectangle;
         Rectangle ScreenRectangle;
 
         Point Offset;
         Point ControlsBottom;
-        Point SpaceOverGameBoard = new Point(10, 80);
+        Point SpaceOverGameBoard = new Point(10, 120);
 
         public Game1()
         {
@@ -48,7 +48,7 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            gameBoard = new GameBoard(20, 20, 15);
+            gameBoard = new GameBoard(10, 10, 15);
             controls = new Controls();
 
             gameBoardRectangle.Width = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);
@@ -114,13 +114,13 @@ namespace Miner
 
             spriteBatch.Draw(TileSheet, ScreenRectangle, BackgroundRectangle, Color.White);
 
+            //////////////////////////////////////////////////////////////////////////
+            // игровое поле
             for (int x = 0; x < gameBoard.GameBoardWidth; x++)
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
-                    //////////////////////////////////////////////////////////////////////////
                     // отрисовка бэкграунда €чеек
-                    //////////////////////////////////////////////////////////////////////////
                     int pixelX = ((x * BackgroundCell.Width) - x) + Offset.X;
                     int pixelY = ((y * BackgroundCell.Height) - y) + Offset.Y;
 
@@ -128,19 +128,19 @@ namespace Miner
                         new Rectangle(pixelX, pixelY, BackgroundCell.Width, BackgroundCell.Height),
                         BackgroundCell,
                         Color.White);
-                    //////////////////////////////////////////////////////////////////////////
+
                     // отрисовка €чеек 
-                    //////////////////////////////////////////////////////////////////////////
                     pixelX = ((x * BoardCell.CellWidth) + x + 1) + Offset.X;
                     pixelY = ((y * BoardCell.CellHeight) + y + 1) + Offset.Y;
 
                     spriteBatch.Draw(TileSheet,
                         new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight),
                         gameBoard.GetTileRect(x, y), Color.White);
-                    //////////////////////////////////////////////////////////////////////////
                 }
             }
 
+            //////////////////////////////////////////////////////////////////////////
+            // кнопки
             for (int i = 0; i < controls.CountControls(); i++)
             {
                 int pixelX = 0;
@@ -162,6 +162,13 @@ namespace Miner
                     new Rectangle(pixelX, pixelY, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight),
                     controls.GetControlRect(i), Color.White);
             }
+            //////////////////////////////////////////////////////////////////////////
+            // биг смайл
+            spriteBatch.Draw(TileSheet,
+                new Rectangle(10, 20, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight),
+                new Rectangle(10, 10, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight),
+                Color.White);
+            //////////////////////////////////////////////////////////////////////////
 
             spriteBatch.End();
 

@@ -62,7 +62,7 @@ namespace Miner
         }
 
         /// <summary>
-        /// элимент управления
+        /// элемент управления
         /// </summary>
         /// <param name="x">X в текстуре</param>
         /// <param name="y">Y в текстуре</param>

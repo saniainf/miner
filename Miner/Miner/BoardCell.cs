@@ -106,6 +106,14 @@ namespace Miner
         }
 
         /// <summary>
+        /// суффикс флажка на клетке
+        /// </summary>
+        public bool SuffixFlag
+        {
+            get { return _suffixFlag; }
+        }
+
+        /// <summary>
         /// проверка наличия мины
         /// </summary>
         public bool MineHave
