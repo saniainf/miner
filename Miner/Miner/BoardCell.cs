@@ -8,6 +8,7 @@ namespace Miner
 {
     class BoardCell
     {
+        //типы ячеек
         public enum TypeCell
         {
             Empty,
