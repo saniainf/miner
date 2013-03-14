@@ -156,19 +156,16 @@ namespace Miner
                         pixelX = ControlsBottom.X + 5;
                         pixelY = ControlsBottom.Y;
                         break;
+                    case "SmileButton":
+                        pixelX = ControlsBottom.X + 5;
+                        pixelY = ControlsBottom.Y;
+                        break;
                 }
 
                 spriteBatch.Draw(TileSheet,
                     new Rectangle(pixelX, pixelY, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight),
                     controls.GetControlRect(i), Color.White);
             }
-            //////////////////////////////////////////////////////////////////////////
-            // биг смайл
-            spriteBatch.Draw(TileSheet,
-                new Rectangle(10, 20, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight),
-                new Rectangle(10, 10, ControlsPiece.ControlsWidth, ControlsPiece.ControlsHeight),
-                Color.White);
-            //////////////////////////////////////////////////////////////////////////
 
             spriteBatch.End();
 

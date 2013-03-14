@@ -68,5 +68,5 @@ namespace Miner
             return Name;
         }
     }
-    }
+    
 }
