@@ -99,9 +99,9 @@ namespace Miner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            GameBoardUpdate(Mouse.GetState());
-
             SmileUpdate(Mouse.GetState());
+
+            GameBoardUpdate(Mouse.GetState());
 
             base.Update(gameTime);
         }
@@ -183,20 +183,26 @@ namespace Miner
         /// <param name="mouseState"></param>
         private void SmileUpdate(MouseState mouseState)
         {
-            if (mouseState.LeftButton != ButtonState.Pressed)
-                smileButton.smileFear = false;
+            smileButton.Clear3Suffix();
 
             Rectangle rect = new Rectangle(
                     (ScreenRectangle.Width - SmileButton.SmileWidth) / 2,
                     (SpaceOverGameBoard.Y - SmileButton.SmileHeight) / 2,
                     SmileButton.SmileWidth, SmileButton.SmileHeight);
 
-            if (rect.Contains(mouseState.X, mouseState.Y) && mouseState.LeftButton == ButtonState.Pressed)
-                smileButton.SuffixPress = true;
-            else smileButton.SuffixPress = false;
+            if (rect.Contains(mouseState.X, mouseState.Y))
+            {
+                smileButton.SuffixSelect = true;
 
-            if (smileButton.SuffixPress == true && mouseState.LeftButton == ButtonState.Released)
-                gameBoard.ClearBoard();
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                    smileButton.SuffixPress = true;
+
+                if (smileButton.SuffixPress && mouseState.LeftButton == ButtonState.Released)
+                {
+                    smileButton.SuffixPress = false;
+                    gameBoard.ClearBoard();
+                }
+            }
         }
     }
 }

@@ -24,6 +24,8 @@ namespace Miner
         private Point smileTexture = new Point(430, 66);
         
         private bool _suffixPress;
+        private bool _suffixSelect;
+        private bool _suffixFear;
 
         /// <summary>
         /// суффикс состояния нажатия на кнопку
@@ -46,15 +48,38 @@ namespace Miner
             }
         }
 
-        public bool smileFear
+        /// <summary>
+        /// суфикс выделения смайла
+        /// </summary>
+        public bool SuffixSelect
         {
+            get { return _suffixSelect; }
+
             set
             {
-                if (value == true && smileState != SmileState.Fear)
-                    smileState = SmileState.Fear;
+                if (value == true && !_suffixSelect)
+                {
+                    _suffixSelect = true;
+                }
 
-                if (value == false && smileState == SmileState.Fear)
-                    smileState = SmileState.Normal;
+                if (value == false && _suffixSelect)
+                {
+                    _suffixSelect = false;
+                }
+            }
+        }
+
+        public bool smileFear
+        {
+            get { return _suffixFear; }
+
+            set
+            {
+                if (value == true && !_suffixFear)
+                    _suffixFear = true;
+
+                if (value == false && _suffixFear)
+                    _suffixFear = false;
             }
         }
 
@@ -66,6 +91,8 @@ namespace Miner
         public SmileButton ()
         {
             _suffixPress = false;
+            _suffixSelect = false;
+            _suffixFear = false;
             smileState = SmileState.Normal;
         }
 
@@ -84,10 +111,6 @@ namespace Miner
                     x = smileTexture.X;
                     break;
 
-                case "Fear":
-                    x = smileTexture.X + SmileWidth * (int)SmileState.Fear;
-                    break;
-
                 case "Cool":
                     x = smileTexture.X + SmileWidth * (int)SmileState.Cool;
                     break;
@@ -103,8 +126,25 @@ namespace Miner
                 x = smileTexture.X;
             }
 
+            if (_suffixFear)
+            {
+                x = smileTexture.X + SmileWidth * (int)SmileState.Fear;
+            }
+
             return new Rectangle(x, y, SmileWidth, SmileHeight);
         }
+
+        /// <summary>
+        /// обнуление 3 суффиксов ячейки Press Select
+        /// </summary>
+        public void Clear3Suffix()
+        {
+            if (SuffixPress && !SuffixSelect) // недаст убрать PressOn пока ячейка Select
+                SuffixPress = false;
+            if (SuffixSelect)
+                SuffixSelect = false;
+            if (smileFear)
+                smileFear = false;
+        }
     }
-    
 }
