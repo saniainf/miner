@@ -40,15 +40,15 @@ namespace Miner
         }
 
         /// <summary>
-        /// просто очистка всего поля и установка новых мин
+        /// очистка всего поля и установка новых мин
         /// </summary>
-        private void ClearBoard()
+        public void ClearBoard()
         {
             for (int x = 0; x < GameBoardWidth; x++)
             {
                 for (int y = 0; y < GameBoardHeight; y++)
                 {
-                    boardSquares[x, y] = new BoardCell(BoardCell.TypeCell.Empty);
+                    boardSquares[x, y] = new BoardCell();
                 }
             }
             PlaceMines();

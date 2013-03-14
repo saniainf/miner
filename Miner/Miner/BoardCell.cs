@@ -9,7 +9,7 @@ namespace Miner
     class BoardCell
     {
         //типы ячеек
-        public enum TypeCell
+        enum TypeCell
         {
             Empty,
             Num1,
@@ -30,8 +30,8 @@ namespace Miner
         }
         private TypeCell type;
 
-        public const int CellHeight = 20;
-        public const int CellWidth = 20;
+        public const int CellHeight = 21;
+        public const int CellWidth = 21;
 
         public const int Offset = 1;
 
@@ -146,9 +146,8 @@ namespace Miner
         /// ячейка игрового поля
         /// </summary>
         /// <param name="type">тип ячейки</param>
-        public BoardCell(TypeCell type)
+        public BoardCell()
         {
-            this.type = type;
             _suffixClose = true;
             _suffixPress = false;
             _suffixSelect = false;

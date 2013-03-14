@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Media;
 namespace Miner
 {
     /// <summary>
-    /// This is the main type for your game
+    /// main class
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
@@ -23,13 +23,24 @@ namespace Miner
 
         GameBoard gameBoard;
 
-        Rectangle BackgroundCell = new Rectangle(0, 330, 22, 22);
-        Rectangle BackgroundRectangle = new Rectangle(31, 1, 100, 100);
-        Rectangle gameBoardRectangle;
+        SmileButton smileButton;
+
+        /// <summary>
+        /// rectangle всего экрана
+        /// </summary>
         Rectangle ScreenRectangle;
 
-        Point Offset;
-        Point SpaceOverGameBoard = new Point(10, 120);
+        /// <summary>
+        /// отступы вокруг игрового пол€ (over gameBoard, top)
+        /// </summary>
+        Point SpaceOverGameBoard;
+
+        /// <summary>
+        /// rectangle игрового пол€
+        /// </summary>
+        Rectangle gameBoardRectangle;
+
+        Rectangle BackgroundRectangle = new Rectangle(31, 1, 100, 100);
 
         public Game1()
         {
@@ -38,34 +49,33 @@ namespace Miner
         }
 
         /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
+        /// initialize item
         /// </summary>
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
             gameBoard = new GameBoard(10, 10, 15);
+            smileButton = new SmileButton();
 
-            gameBoardRectangle.Width = (gameBoard.GameBoardWidth * BoardCell.CellWidth) + (gameBoard.GameBoardWidth + BoardCell.Offset);
-            gameBoardRectangle.Height = (gameBoard.GameBoardHeight * BoardCell.CellHeight) + (gameBoard.GameBoardHeight + BoardCell.Offset);
+            SpaceOverGameBoard = new Point(10, 60); // TODO заменить на размеры текстур
 
-            graphics.PreferredBackBufferWidth = gameBoardRectangle.Width + SpaceOverGameBoard.X;
-            graphics.PreferredBackBufferHeight = gameBoardRectangle.Height + SpaceOverGameBoard.Y;
+            gameBoardRectangle = new Rectangle(
+                SpaceOverGameBoard.X,
+                SpaceOverGameBoard.X + SpaceOverGameBoard.Y,
+                gameBoard.GameBoardWidth * BoardCell.CellWidth,
+                gameBoard.GameBoardHeight * BoardCell.CellHeight);
+
+            graphics.PreferredBackBufferWidth = gameBoardRectangle.Width + SpaceOverGameBoard.X * 2;
+            graphics.PreferredBackBufferHeight = gameBoardRectangle.Height + SpaceOverGameBoard.X * 2 + SpaceOverGameBoard.Y;
             graphics.ApplyChanges();
 
             ScreenRectangle = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
-
-            Offset.X = (ScreenRectangle.Width - gameBoardRectangle.Width) / 2;
-            Offset.Y = (ScreenRectangle.Height - gameBoardRectangle.Height) / 2;
 
             base.Initialize();
         }
 
         /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
+        /// LoadContent
         /// </summary>
         protected override void LoadContent()
         {
@@ -76,8 +86,7 @@ namespace Miner
         }
 
         /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// all content.
+        /// UnloadContent 
         /// </summary>
         protected override void UnloadContent()
         {
@@ -85,13 +94,14 @@ namespace Miner
         }
 
         /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
+        /// main update
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
             GameBoardUpdate(Mouse.GetState());
+
+            SmileUpdate(Mouse.GetState());
 
             base.Update(gameTime);
         }
@@ -105,34 +115,30 @@ namespace Miner
             GraphicsDevice.Clear(Color.Blue);
 
             spriteBatch.Begin();
-
+            
             spriteBatch.Draw(TileSheet, ScreenRectangle, BackgroundRectangle, Color.White);
-
-            //////////////////////////////////////////////////////////////////////////
+            
             // игровое поле
             for (int x = 0; x < gameBoard.GameBoardWidth; x++)
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
                 {
-                    // отрисовка бэкграунда €чеек
-                    int pixelX = ((x * BackgroundCell.Width) - x) + Offset.X;
-                    int pixelY = ((y * BackgroundCell.Height) - y) + Offset.Y;
-
-                    spriteBatch.Draw(TileSheet,
-                        new Rectangle(pixelX, pixelY, BackgroundCell.Width, BackgroundCell.Height),
-                        BackgroundCell,
-                        Color.White);
-
-                    // отрисовка €чеек 
-                    pixelX = ((x * BoardCell.CellWidth) + x + 1) + Offset.X;
-                    pixelY = ((y * BoardCell.CellHeight) + y + 1) + Offset.Y;
+                    int pixelX = gameBoardRectangle.X + BoardCell.CellWidth * x;
+                    int pixelY = gameBoardRectangle.Y + BoardCell.CellHeight * y;
 
                     spriteBatch.Draw(TileSheet,
                         new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight),
                         gameBoard.GetTileRect(x, y), Color.White);
                 }
             }
-            //////////////////////////////////////////////////////////////////////////
+            
+            // smile
+            spriteBatch.Draw(TileSheet,
+                new Rectangle(
+                    (ScreenRectangle.Width - SmileButton.SmileWidth) / 2,
+                    (SpaceOverGameBoard.Y - SmileButton.SmileHeight) / 2,
+                    SmileButton.SmileWidth, SmileButton.SmileHeight),
+                smileButton.GetSmileRect(), Color.White);
 
             spriteBatch.End();
 
@@ -140,13 +146,11 @@ namespace Miner
         }
 
         /// <summary>
-        /// update инпута
+        /// update gameboard инпута
         /// </summary>
         /// <param name="mouseState"></param>
         private void GameBoardUpdate(MouseState mouseState)
         {
-            //////////////////////////////////////////////////////////////////////////
-            // игровое поле
             for (int x = 0; x < gameBoard.GameBoardWidth; x++)
             {
                 for (int y = 0; y < gameBoard.GameBoardHeight; y++)
@@ -156,19 +160,43 @@ namespace Miner
                     gameBoard.Clear2Suffix(x, y);
 
                     // rectangle провер€емой €чейки
-                    int pixelX = ((x * BoardCell.CellWidth) + x + 1) + Offset.X;
-                    int pixelY = ((y * BoardCell.CellHeight) + y + 1) + Offset.Y;
-                    Rectangle rect = new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight);
+                    Rectangle rect = new Rectangle(
+                        gameBoardRectangle.X + BoardCell.CellWidth * x,
+                        gameBoardRectangle.Y + BoardCell.CellHeight * y,
+                        BoardCell.CellWidth, BoardCell.CellHeight);
 
-                    // если hover mouse вызываем проверку суффиксов €чейки
+                    // если hover mouse вызываем проверку суффиксов €чейки и пугаем смайл
                     if (rect.Contains(mouseState.X, mouseState.Y))
                     {
+                        if (mouseState.LeftButton == ButtonState.Pressed)
+                            smileButton.smileFear = true;
+
                         gameBoard.CheckSuffixCell(x, y, mouseState);
                     }
                 }
             }
-            //////////////////////////////////////////////////////////////////////////
+        }
 
+        /// <summary>
+        /// update smile input
+        /// </summary>
+        /// <param name="mouseState"></param>
+        private void SmileUpdate(MouseState mouseState)
+        {
+            if (mouseState.LeftButton != ButtonState.Pressed)
+                smileButton.smileFear = false;
+
+            Rectangle rect = new Rectangle(
+                    (ScreenRectangle.Width - SmileButton.SmileWidth) / 2,
+                    (SpaceOverGameBoard.Y - SmileButton.SmileHeight) / 2,
+                    SmileButton.SmileWidth, SmileButton.SmileHeight);
+
+            if (rect.Contains(mouseState.X, mouseState.Y) && mouseState.LeftButton == ButtonState.Pressed)
+                smileButton.SuffixPress = true;
+            else smileButton.SuffixPress = false;
+
+            if (smileButton.SuffixPress == true && mouseState.LeftButton == ButtonState.Released)
+                gameBoard.ClearBoard();
         }
     }
 }

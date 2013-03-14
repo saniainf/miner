@@ -14,7 +14,6 @@ namespace Miner
         public Controls()
         {
             ListControls = new List<ControlsPiece>();
-            ListControls.Add(new ControlsPiece(430, 0, "New"));
             ListControls.Add(new ControlsPiece(510, 0, "Options"));
             ListControls.Add(new ControlsPiece(66, 430, "SmileButton"));
         }

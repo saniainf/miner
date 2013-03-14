@@ -8,15 +8,22 @@ namespace Miner
 {
     class SmileButton
     {
-        public const int SmileWidth = 40;
-        public const int SmileHeight = 40;
+        enum SmileState
+        {
+            Normal,
+            Fear,
+            Cool,
+            Dead
+        }
+
+        public const int SmileWidth = 42;
+        public const int SmileHeight = 42;
+
+        private SmileState smileState;
+
+        private Point smileTexture = new Point(430, 66);
         
         private bool _suffixPress;
-
-        private int pixelX;
-        private int pixelY;
-
-        public string Name;
 
         /// <summary>
         /// суффикс состояния нажатия на кнопку
@@ -39,33 +46,64 @@ namespace Miner
             }
         }
 
+        public bool smileFear
+        {
+            set
+            {
+                if (value == true && smileState != SmileState.Fear)
+                    smileState = SmileState.Fear;
+
+                if (value == false && smileState == SmileState.Fear)
+                    smileState = SmileState.Normal;
+            }
+        }
+
         /// <summary>
-        /// элемент управления
+        /// button smile
         /// </summary>
         /// <param name="x">X в текстуре</param>
         /// <param name="y">Y в текстуре</param>
-        public SmileButton (int x, int y, string name)
+        public SmileButton ()
         {
-            pixelX = x;
-            pixelY = y;
-            Name = name;
             _suffixPress = false;
+            smileState = SmileState.Normal;
         }
 
+        /// <summary>
+        /// возвращает rectangle смайла в sheet
+        /// </summary>
+        /// <returns></returns>
         public Rectangle GetSmileRect()
         {
-            int x = pixelX;
-            int y = pixelY;
+            int x = smileTexture.X;
+            int y = smileTexture.Y;
+
+            switch (smileState.ToString())
+            {
+                case "Normal":
+                    x = smileTexture.X;
+                    break;
+
+                case "Fear":
+                    x = smileTexture.X + SmileWidth * (int)SmileState.Fear;
+                    break;
+
+                case "Cool":
+                    x = smileTexture.X + SmileWidth * (int)SmileState.Cool;
+                    break;
+
+                case "Dead":
+                    x = smileTexture.X + SmileWidth * (int)SmileState.Dead;
+                    break;
+            }
 
             if (_suffixPress)
-                y = y + SmileHeight;
+            {
+                y = smileTexture.Y + SmileWidth;
+                x = smileTexture.X;
+            }
 
             return new Rectangle(x, y, SmileWidth, SmileHeight);
-        }
-
-        public string GetName()
-        {
-            return Name;
         }
     }
     
