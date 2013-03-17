@@ -25,6 +25,8 @@ namespace Miner
 
         SmileButton smileButton;
 
+        Button smlButton;
+
         /// <summary>
         /// rectangle всего экрана
         /// </summary>
@@ -56,7 +58,6 @@ namespace Miner
             this.IsMouseVisible = true;
             gameBoard = new GameBoard(10, 10, 15);
             smileButton = new SmileButton();
-
             SpaceOverGameBoard = new Point(10, 60); // TODO заменить на размеры текстур
 
             gameBoardRectangle = new Rectangle(
@@ -70,6 +71,13 @@ namespace Miner
             graphics.ApplyChanges();
 
             ScreenRectangle = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+
+            smlButton = new Button(new Rectangle((ScreenRectangle.Width - 42) / 2, (SpaceOverGameBoard.Y - 42) / 2, 42, 42), new Point(388, 0));
+
+            smlButton.Action += () =>
+            {
+                gameBoard.ClearBoard();
+            };
 
             base.Initialize();
         }
@@ -99,9 +107,13 @@ namespace Miner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            SmileUpdate(Mouse.GetState());
+            MouseState mouseState = Mouse.GetState();
 
-            GameBoardUpdate(Mouse.GetState());
+            SmileUpdate(mouseState);
+
+            smlButton.btnUpdate(mouseState);
+
+            GameBoardUpdate(mouseState);
 
             base.Update(gameTime);
         }
@@ -131,7 +143,12 @@ namespace Miner
                         gameBoard.GetTileRect(x, y), Color.White);
                 }
             }
-            
+
+            spriteBatch.Draw(TileSheet,
+                smlButton.boundingBox,
+                smlButton.GetBBoxSheet(),
+                Color.White);
+            /*
             // smile
             spriteBatch.Draw(TileSheet,
                 new Rectangle(
@@ -139,7 +156,7 @@ namespace Miner
                     (SpaceOverGameBoard.Y - SmileButton.SmileHeight) / 2,
                     SmileButton.SmileWidth, SmileButton.SmileHeight),
                 smileButton.GetSmileRect(), Color.White);
-
+            */
             spriteBatch.End();
 
             base.Draw(gameTime);

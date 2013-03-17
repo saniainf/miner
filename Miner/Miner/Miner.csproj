@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoardCell.cs" />
+    <Compile Include="Button.cs" />
     <Compile Include="SmileButton.cs" />
     <Compile Include="GameBoard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

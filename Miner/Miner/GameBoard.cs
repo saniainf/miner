@@ -25,7 +25,7 @@ namespace Miner
         /// Игровое поле
         /// </summary>
         /// <param name="width">высота в ячейках</param>
-        /// <param name="height">ширина в ячейуах</param>
+        /// <param name="height">ширина в ячейках</param>
         /// <param name="numMines">количество мин</param>
         public GameBoard(int width, int height, int numMines)
         {
@@ -81,7 +81,6 @@ namespace Miner
                 for (int y = 0; y < GameBoardHeight; y++)
                 {
                     int count = 0;
-                    //////////////////////////////////////////////////////////////////////////
                     if (!boardSquares[x, y].MineHave)
                     {
                         for (int miniX = x - 1; miniX <= x + 1; miniX++)
@@ -98,7 +97,6 @@ namespace Miner
                             }
                         }
                     }
-                    //////////////////////////////////////////////////////////////////////////
                     if (count > 0)
                     {
                         boardSquares[x, y].AddNumber(count);
