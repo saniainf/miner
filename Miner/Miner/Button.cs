@@ -14,6 +14,9 @@ namespace Miner
 {
     class Button
     {
+        /// <summary>
+        /// состояния кнопки
+        /// </summary>
         private enum State
         {
             BTN_NORMAL,
@@ -26,11 +29,20 @@ namespace Miner
         private Point _texturePoint;
         private bool _suffixOne;
 
+        /// <summary>
+        /// ограничивающий прямоугольник
+        /// </summary>
         public Rectangle boundingBox
         {
             get { return _boundingBox; }
         }
 
+        /// <summary>
+        /// класс кнопки
+        /// </summary>
+        /// <param name="box">ограничивающий прямоугольник</param>
+        /// <param name="point">точка начала текстуры в sheet</param>
+        /// <param name="suffix">суфикс (можно не указывать)</param>
         public Button(Rectangle box, Point point, bool suffix = false)
         {
             _boundingBox = box;
@@ -41,6 +53,10 @@ namespace Miner
 
         public Action Action { get; set; }
 
+        /// <summary>
+        /// апдейт кнопки с сменой состояний
+        /// </summary>
+        /// <param name="mouseState">мышь</param>
         public void btnUpdate(MouseState mouseState)
         {
             if (_boundingBox.Contains(mouseState.X, mouseState.Y))

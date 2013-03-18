@@ -18,7 +18,6 @@ namespace Miner
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
         Texture2D TileSheet;
 
         GameBoard gameBoard;
@@ -144,19 +143,12 @@ namespace Miner
                 }
             }
 
+            // smile button
             spriteBatch.Draw(TileSheet,
                 smlButton.boundingBox,
                 smlButton.GetBBoxSheet(),
                 Color.White);
-            /*
-            // smile
-            spriteBatch.Draw(TileSheet,
-                new Rectangle(
-                    (ScreenRectangle.Width - SmileButton.SmileWidth) / 2,
-                    (SpaceOverGameBoard.Y - SmileButton.SmileHeight) / 2,
-                    SmileButton.SmileWidth, SmileButton.SmileHeight),
-                smileButton.GetSmileRect(), Color.White);
-            */
+
             spriteBatch.End();
 
             base.Draw(gameTime);
