@@ -45,6 +45,7 @@ namespace Miner
         private Type _type;
         private Point _texturePoint;
         private Rectangle _boundingBox;
+        private bool _MRB = true;
 
         /// <summary>
         /// ограничивающий прямоугольник
@@ -68,6 +69,8 @@ namespace Miner
             _texturePoint = point;
             _boundingBox = cellBBox;
         }
+
+        public Action Action { get; set; }
 
         /// <summary>
         /// проверка наличия мины
@@ -113,20 +116,68 @@ namespace Miner
                     if (_state == State.CELL_CLOSE && mouseState.LeftButton == ButtonState.Released)
                         _state = State.CELL_HOVER;
 
-                    if (_state == State.CELL_HOVER && mouseState.LeftButton == ButtonState.Pressed)
+                    if (_state == State.CELL_HOVER && mouseState.LeftButton == ButtonState.Pressed && !_flag)
                         _state = State.CELL_PRESSED;
 
                     if (_state == State.CELL_PRESSED && mouseState.LeftButton == ButtonState.Released)
                     {
                         _state = State.CELL_OPEN;
-                        return true;
+                        if (_type == Type.EMPTY)
+                            return true;
+                        else if (_type == Type.MINE && Action != null)
+                            Action.Invoke();
+                        else return false;
+                    }
+
+                    if (mouseState.RightButton == ButtonState.Pressed && _MRB)
+                    {
+                        ChangeSuffix();
                     }
                 }
                 else if (mouseState.LeftButton == ButtonState.Released)
+                {
                     _state = State.CELL_CLOSE;
+                    _MRB = false;
+                }
                 else if (mouseState.LeftButton == ButtonState.Pressed && _state == State.CELL_PRESSED)
                     _state = State.CELL_HOVER;
             }
+
+            if (mouseState.RightButton == ButtonState.Released)
+                _MRB = true;
+
+            return false;
+        }
+
+        void ChangeSuffix()
+        {
+            if (!_flag && !_maybe)
+            {
+                _flag = true;
+            }
+
+            else if (_flag)
+            {
+                _flag = false;
+                _maybe = true;
+            }
+
+            else if (_maybe)
+            {
+                _maybe = false;
+            }
+            _MRB = false;
+        }
+
+        public bool OpenEmpty()
+        {
+            if (_state == State.CELL_CLOSE && !_flag)
+            {
+                _state = State.CELL_OPEN;
+                if (_type == Type.EMPTY)
+                    return true;
+            }
+            else return false;
             return false;
         }
 
@@ -161,24 +212,24 @@ namespace Miner
             {
                 if (_state == State.CELL_CLOSE)
                 {
-                    x = _texturePoint.X + _boundingBox.Width * 2;
+                    x = _texturePoint.X + _boundingBox.Width * 3;
                     y = _texturePoint.Y;
                 }
 
                 if (_state == State.CELL_HOVER)
                 {
-                    x = _texturePoint.X + _boundingBox.Width * 2;
+                    x = _texturePoint.X + _boundingBox.Width * 3;
                     y = _texturePoint.Y + _boundingBox.Height;
                 }
             }
-            
-            
+
+
             if (_state == State.CELL_OPEN)
             {
                 x = _texturePoint.X + _boundingBox.Width;
                 y = _boundingBox.Height * (int)_type;
             }
-            
+
             return new Rectangle(x, y, _boundingBox.Width, _boundingBox.Height);
         }
     }

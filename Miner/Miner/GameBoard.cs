@@ -46,6 +46,8 @@ namespace Miner
             ClearBoard();
         }
 
+        public Action Action { get; set; }
+
         public void gameBoardUpdate(MouseState mouseState)
         {
             if (_gameBoardBBox.Contains(mouseState.X, mouseState.Y))
@@ -55,7 +57,7 @@ namespace Miner
                     for (int y = 0; y < _countCells.Y; y++)
                     {
                         if (_board[x, y].cellUpdate(mouseState))
-                            OpenEmptyCell(1, 2);
+                            OpenEmptyCell(x, y);
                     }
                 }
             }
@@ -68,8 +70,8 @@ namespace Miner
                 for (int y = 0; y < _countCells.Y; y++)
                 {
                     spriteBatch.Draw(tileSheet,
-                        _board[x,y].boundingBox,
-                        _board[x,y].GetBBoxSheet(),
+                        _board[x, y].boundingBox,
+                        _board[x, y].GetBBoxSheet(),
                         Color.White);
 
                 }
@@ -92,6 +94,12 @@ namespace Miner
                             _cellSize.X,
                             _cellSize.Y),
                         new Point(0, 0));
+
+                    _board[x, y].Action += () =>
+                        {
+                            if (Action != null)
+                                Action.Invoke();
+                        };
                 }
             }
             PlaceMines();
@@ -131,12 +139,8 @@ namespace Miner
                             for (int miniY = y - 1; miniY <= y + 1; miniY++)
                             {
                                 if (miniX >= 0 && miniY >= 0 && miniX < _countCells.X && miniY < _countCells.Y)
-                                {
                                     if (_board[miniX, miniY].MineHave)
-                                    {
                                         count = count + 1;
-                                    }
-                                }
                             }
                         }
                     }
@@ -148,8 +152,6 @@ namespace Miner
             }
         }
 
-        #region old methods
-        
         /// <summary>
         /// открыть все пустые ячейки рядом с начальной
         /// </summary>
@@ -161,94 +163,13 @@ namespace Miner
             {
                 for (int miniY = startY - 1; miniY <= startY + 1; miniY++) // цикл по Y квадратика
                 {
-                    if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight) // если невыходит за пределы поля
+                    if (miniX >= 0 && miniY >= 0 && miniX < _countCells.X && miniY < _countCells.Y) // если невыходит за пределы поля
                     {
-                        if (boardSquares[miniX, miniY].SuffixClose && !boardSquares[miniX,miniY].SuffixFlag) // если закрыта
-                        {
-                            boardSquares[miniX, miniY].SuffixClose = false; // открыть
-                            NumberCells--; // удаляем из счетчика ячеек
-                            Clear2Suffix(miniX, miniY); // обнулить суффиксы
-                            // TODO: разобраться с рекурсией
-                            if (boardSquares[miniX, miniY].EmptyCell) // если пустая то вызвать для нее OpenEmptyCell
-                                OpenEmptyCell(miniX, miniY);
-                        }
+                        if (_board[miniX, miniY].OpenEmpty())
+                            OpenEmptyCell(miniX, miniY);
                     }
                 }
             }
         }
-        /*
-        /// <summary>
-        /// проверка состояния ячейки и установка соответствующих суффиксов
-        /// </summary>
-        /// <param name="x">X ячейки</param>
-        /// <param name="y">Y ячейки</param>
-        /// <param name="mouseState"></param>
-        public void CheckSuffixCell(int x, int y, MouseState mouseState)
-        {
-            if (boardSquares[x, y].SuffixClose) // если закрыта
-            {
-                boardSquares[x, y].SuffixSelect = true; // ставим selectOn
-
-                if (mouseState.LeftButton == ButtonState.Pressed && !boardSquares[x,y].SuffixFlag)
-                {
-                    boardSquares[x, y].SuffixPress = true; // если нажата кнопка и нет флажка то ставим pressON
-                }
-
-                if (boardSquares[x, y].SuffixPress && mouseState.LeftButton == ButtonState.Released) // если PressON и кнопка ненажата то открываем ячейку
-                {
-                    boardSquares[x, y].SuffixClose = false;  // ячейка открыта
-                    boardSquares[x, y].SuffixPress = false;  // обнуляем все 
-                    boardSquares[x, y].SuffixSelect = false; // суффиксы
-                    NumberCells--; // удаляем из счетчика ячеек
-
-                    if (boardSquares[x, y].EmptyCell) // если пустая то открываем соседние пустые
-                        OpenEmptyCell(x, y);
-                }
-
-                if (mouseState.RightButton == ButtonState.Pressed && MouseRightButton)
-                {
-                    boardSquares[x, y].ChangeFlag();
-                    MouseRightButton = false;
-                }
-
-                if (mouseState.RightButton == ButtonState.Released)
-                {
-                    MouseRightButton = true;
-                }
-            }
-        }
-
-        /// <summary>
-        /// возвращает Rectangle текструры конкретной ячейки в TileSheet
-        /// </summary>
-        /// <param name="x">измерение массива</param>
-        /// <param name="y">измерение массива</param>
-        /// <returns></returns>
-        public Rectangle GetTileRect(int x, int y)
-        {
-            return boardSquares[x, y].GetTileRect();
-        }
-
-        /// <summary>
-        /// проверка Выиграл / Проиграл
-        /// </summary>
-        /// <param name="x">X ячейка</param>
-        /// <param name="y">Y ячейка</param>
-        public void WinGameOver(int x, int y)
-        {
-            // проиграл :=(
-            if (boardSquares[x,y].MineHave && !boardSquares[x,y].SuffixClose)
-            {
-                //ClearBoard();
-            }
-
-            // выиграл :=)
-            if (NumberMines == NumberCells)
-            {
-                //ClearBoard();
-            }
-        }
-        */
-        #endregion
     }
 }

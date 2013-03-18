@@ -25,10 +25,10 @@ namespace Miner
 
         int _width = 20;
         int _height = 20;
-        int _count = 50;
+        int _count = 10;
 
-        Point smlButtonSize = new Point(42,42);
-        Point cellGameboardSize = new Point(21,21);
+        Point smlButtonSize = new Point(42, 42);
+        Point cellGameboardSize = new Point(21, 21);
 
         /// <summary>
         /// bounding box всего экрана
@@ -57,7 +57,7 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            
+
             spaceOverGameBoard = new Point(10, 60); // TODO заменить на размеры текстур
 
             NewGame(_width, _height, _count);
@@ -106,11 +106,11 @@ namespace Miner
         {
             GraphicsDevice.Clear(Color.Gray);
             spriteBatch.Begin();
-            
+
             spriteBatch.Draw(TileSheet, ScreenBBox, Background, Color.White);
-            
+
             smlButton.btnDraw(spriteBatch, TileSheet);
- 
+
             gameBoard.gameBoardDraw(spriteBatch, TileSheet);
 
             spriteBatch.End();
@@ -142,9 +142,14 @@ namespace Miner
                 new Point(456, 0));
 
             smlButton.Action += () =>
-            {
-                NewGame(_width, _height, _count);
-            };
+                {
+                    NewGame(_width, _height, _count);
+                };
+
+            gameBoard.Action += () =>
+                {
+                    NewGame(_width, _height, _count);
+                };
         }
     }
 }
