@@ -21,27 +21,29 @@ namespace Miner
         Texture2D TileSheet;
 
         GameBoard gameBoard;
-
-        SmileButton smileButton;
-
         Button smlButton;
 
+        int _width = 20;
+        int _height = 20;
+        int _count = 50;
+
+        Point smlButtonSize = new Point(42,42);
+        Point cellGameboardSize = new Point(21,21);
+
         /// <summary>
-        /// rectangle всего экрана
+        /// bounding box всего экрана
         /// </summary>
-        Rectangle ScreenRectangle;
+        Rectangle ScreenBBox;
 
         /// <summary>
         /// отступы вокруг игрового пол€ (over gameBoard, top)
         /// </summary>
-        Point SpaceOverGameBoard;
+        Point spaceOverGameBoard;
 
         /// <summary>
-        /// rectangle игрового пол€
+        /// текстура бэкграунда
         /// </summary>
-        Rectangle gameBoardRectangle;
-
-        Rectangle BackgroundRectangle = new Rectangle(31, 1, 100, 100);
+        Rectangle Background = new Rectangle(499, 1, 100, 100);
 
         public Game1()
         {
@@ -55,28 +57,10 @@ namespace Miner
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            gameBoard = new GameBoard(10, 10, 15);
-            smileButton = new SmileButton();
-            SpaceOverGameBoard = new Point(10, 60); // TODO заменить на размеры текстур
+            
+            spaceOverGameBoard = new Point(10, 60); // TODO заменить на размеры текстур
 
-            gameBoardRectangle = new Rectangle(
-                SpaceOverGameBoard.X,
-                SpaceOverGameBoard.X + SpaceOverGameBoard.Y,
-                gameBoard.GameBoardWidth * BoardCell.CellWidth,
-                gameBoard.GameBoardHeight * BoardCell.CellHeight);
-
-            graphics.PreferredBackBufferWidth = gameBoardRectangle.Width + SpaceOverGameBoard.X * 2;
-            graphics.PreferredBackBufferHeight = gameBoardRectangle.Height + SpaceOverGameBoard.X * 2 + SpaceOverGameBoard.Y;
-            graphics.ApplyChanges();
-
-            ScreenRectangle = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
-
-            smlButton = new Button(new Rectangle((ScreenRectangle.Width - 42) / 2, (SpaceOverGameBoard.Y - 42) / 2, 42, 42), new Point(388, 0));
-
-            smlButton.Action += () =>
-            {
-                gameBoard.ClearBoard();
-            };
+            NewGame(_width, _height, _count);
 
             base.Initialize();
         }
@@ -108,110 +92,59 @@ namespace Miner
         {
             MouseState mouseState = Mouse.GetState();
 
-            SmileUpdate(mouseState);
-
             smlButton.btnUpdate(mouseState);
-
-            GameBoardUpdate(mouseState);
+            gameBoard.gameBoardUpdate(mouseState);
 
             base.Update(gameTime);
         }
 
         /// <summary>
-        /// отрисовка игры
+        /// main draw
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Blue);
-
+            GraphicsDevice.Clear(Color.Gray);
             spriteBatch.Begin();
             
-            spriteBatch.Draw(TileSheet, ScreenRectangle, BackgroundRectangle, Color.White);
+            spriteBatch.Draw(TileSheet, ScreenBBox, Background, Color.White);
             
-            // игровое поле
-            for (int x = 0; x < gameBoard.GameBoardWidth; x++)
-            {
-                for (int y = 0; y < gameBoard.GameBoardHeight; y++)
-                {
-                    int pixelX = gameBoardRectangle.X + BoardCell.CellWidth * x;
-                    int pixelY = gameBoardRectangle.Y + BoardCell.CellHeight * y;
-
-                    spriteBatch.Draw(TileSheet,
-                        new Rectangle(pixelX, pixelY, BoardCell.CellWidth, BoardCell.CellHeight),
-                        gameBoard.GetTileRect(x, y), Color.White);
-                }
-            }
-
-            // smile button
-            spriteBatch.Draw(TileSheet,
-                smlButton.boundingBox,
-                smlButton.GetBBoxSheet(),
-                Color.White);
+            smlButton.btnDraw(spriteBatch, TileSheet);
+ 
+            gameBoard.gameBoardDraw(spriteBatch, TileSheet);
 
             spriteBatch.End();
-
             base.Draw(gameTime);
         }
 
         /// <summary>
-        /// update gameboard инпута
+        /// нова€ игра
         /// </summary>
-        /// <param name="mouseState"></param>
-        private void GameBoardUpdate(MouseState mouseState)
+        /// <param name="width">количество €чеек по ширине</param>
+        /// <param name="height">количество €чеек по высоте</param>
+        /// <param name="count">количество мин</param>
+        private void NewGame(int width, int height, int count)
         {
-            for (int x = 0; x < gameBoard.GameBoardWidth; x++)
+            gameBoard = new GameBoard(width, height, count, spaceOverGameBoard, cellGameboardSize);
+
+            ScreenBBox = new Rectangle(0, 0,
+                gameBoard.gameBoardBBox.Width + spaceOverGameBoard.X * 2,
+                gameBoard.gameBoardBBox.Height + spaceOverGameBoard.Y + spaceOverGameBoard.X * 2);
+
+            graphics.PreferredBackBufferWidth = ScreenBBox.Width;
+            graphics.PreferredBackBufferHeight = ScreenBBox.Height;
+            graphics.ApplyChanges();
+
+            smlButton = new Button(new Rectangle(
+                (ScreenBBox.Width - smlButtonSize.X) / 2,
+                (spaceOverGameBoard.Y - smlButtonSize.Y) / 2,
+                smlButtonSize.X, smlButtonSize.Y),
+                new Point(456, 0));
+
+            smlButton.Action += () =>
             {
-                for (int y = 0; y < gameBoard.GameBoardHeight; y++)
-                {
-                    gameBoard.WinGameOver(x, y);
-
-                    gameBoard.Clear2Suffix(x, y);
-
-                    // rectangle провер€емой €чейки
-                    Rectangle rect = new Rectangle(
-                        gameBoardRectangle.X + BoardCell.CellWidth * x,
-                        gameBoardRectangle.Y + BoardCell.CellHeight * y,
-                        BoardCell.CellWidth, BoardCell.CellHeight);
-
-                    // если hover mouse вызываем проверку суффиксов €чейки и пугаем смайл
-                    if (rect.Contains(mouseState.X, mouseState.Y))
-                    {
-                        if (mouseState.LeftButton == ButtonState.Pressed)
-                            smileButton.smileFear = true;
-
-                        gameBoard.CheckSuffixCell(x, y, mouseState);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// update smile input
-        /// </summary>
-        /// <param name="mouseState"></param>
-        private void SmileUpdate(MouseState mouseState)
-        {
-            smileButton.Clear3Suffix();
-
-            Rectangle rect = new Rectangle(
-                    (ScreenRectangle.Width - SmileButton.SmileWidth) / 2,
-                    (SpaceOverGameBoard.Y - SmileButton.SmileHeight) / 2,
-                    SmileButton.SmileWidth, SmileButton.SmileHeight);
-
-            if (rect.Contains(mouseState.X, mouseState.Y))
-            {
-                smileButton.SuffixSelect = true;
-
-                if (mouseState.LeftButton == ButtonState.Pressed)
-                    smileButton.SuffixPress = true;
-
-                if (smileButton.SuffixPress && mouseState.LeftButton == ButtonState.Released)
-                {
-                    smileButton.SuffixPress = false;
-                    gameBoard.ClearBoard();
-                }
-            }
+                NewGame(_width, _height, _count);
+            };
         }
     }
 }

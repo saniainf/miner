@@ -78,11 +78,18 @@ namespace Miner
                 _btnState = State.BTN_NORMAL;
             else if (mouseState.LeftButton == ButtonState.Pressed && _btnState == State.BTN_PRESSED)
                 _btnState = State.BTN_HOVER;
+        }
 
+        public void btnDraw(SpriteBatch spriteBatch, Texture2D tileSheet)
+        {
+            spriteBatch.Draw(tileSheet,
+                _boundingBox,
+                GetBBoxSheet(),
+                Color.White);
         }
 
         /// <summary>
-        /// возвращает bbox смайла в sheet
+        /// возвращает bbox кнопки в sheet
         /// </summary>
         /// <returns></returns>
         public Rectangle GetBBoxSheet()

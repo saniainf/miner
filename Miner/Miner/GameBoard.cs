@@ -3,23 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace Miner
 {
     class GameBoard
     {
-        public int GameBoardWidth;
-        public int GameBoardHeight;
-
-        private BoardCell[,] boardSquares;
-
-        public int NumberMines;
-        int NumberCells;
-
-        bool MouseRightButton = true;
+        private CellGameBoard[,] _board;
+        public int _countMines;
+        int _numberCells;
+        Rectangle _gameBoardBBox;
+        Point _countCells;
+        Point _cellSize;
 
         Random rnd = new Random();
+
+        public Rectangle gameBoardBBox
+        {
+            get { return _gameBoardBBox; }
+        }
 
         /// <summary>
         /// Игровое поле
@@ -27,16 +34,46 @@ namespace Miner
         /// <param name="width">высота в ячейках</param>
         /// <param name="height">ширина в ячейках</param>
         /// <param name="numMines">количество мин</param>
-        public GameBoard(int width, int height, int numMines)
+        public GameBoard(int width, int height, int countMines, Point spaceOver, Point cellSize)
         {
-            GameBoardWidth = width;
-            GameBoardHeight = height;
-            NumberMines = numMines;
-            NumberCells = GameBoardHeight * GameBoardWidth;
-
-            boardSquares = new BoardCell[width, height];
-
+            _countMines = countMines;
+            _numberCells = width * height;
+            _countCells.X = width;
+            _countCells.Y = height;
+            _board = new CellGameBoard[width, height];
+            _gameBoardBBox = new Rectangle(spaceOver.X, spaceOver.Y + spaceOver.X, width * cellSize.X, height * cellSize.Y);
+            _cellSize = cellSize;
             ClearBoard();
+        }
+
+        public void gameBoardUpdate(MouseState mouseState)
+        {
+            if (_gameBoardBBox.Contains(mouseState.X, mouseState.Y))
+            {
+                for (int x = 0; x < _countCells.X; x++)
+                {
+                    for (int y = 0; y < _countCells.Y; y++)
+                    {
+                        if (_board[x, y].cellUpdate(mouseState))
+                            OpenEmptyCell(1, 2);
+                    }
+                }
+            }
+        }
+
+        public void gameBoardDraw(SpriteBatch spriteBatch, Texture2D tileSheet)
+        {
+            for (int x = 0; x < _countCells.X; x++)
+            {
+                for (int y = 0; y < _countCells.Y; y++)
+                {
+                    spriteBatch.Draw(tileSheet,
+                        _board[x,y].boundingBox,
+                        _board[x,y].GetBBoxSheet(),
+                        Color.White);
+
+                }
+            }
         }
 
         /// <summary>
@@ -44,11 +81,17 @@ namespace Miner
         /// </summary>
         public void ClearBoard()
         {
-            for (int x = 0; x < GameBoardWidth; x++)
+            for (int x = 0; x < _countCells.X; x++)
             {
-                for (int y = 0; y < GameBoardHeight; y++)
+                for (int y = 0; y < _countCells.Y; y++)
                 {
-                    boardSquares[x, y] = new BoardCell();
+                    _board[x, y] = new CellGameBoard(
+                        new Rectangle(
+                            gameBoardBBox.X + _cellSize.X * x,
+                            gameBoardBBox.Y + _cellSize.Y * y,
+                            _cellSize.X,
+                            _cellSize.Y),
+                        new Point(0, 0));
                 }
             }
             PlaceMines();
@@ -60,13 +103,13 @@ namespace Miner
         /// </summary>
         private void PlaceMines()
         {
-            for (int i = NumberMines; i > 0; i--)
+            for (int i = _countMines; i > 0; i--)
             {
-                int x = rnd.Next(GameBoardWidth);
-                int y = rnd.Next(GameBoardHeight);
+                int x = rnd.Next(_countCells.X);
+                int y = rnd.Next(_countCells.Y);
 
-                if (!boardSquares[x, y].MineHave)
-                    boardSquares[x, y].AddMine();
+                if (!_board[x, y].MineHave)
+                    _board[x, y].AddMine();
                 else i++;
             }
         }
@@ -76,20 +119,20 @@ namespace Miner
         /// </summary>
         private void NumberInCell()
         {
-            for (int x = 0; x < GameBoardWidth; x++)
+            for (int x = 0; x < _countCells.X; x++)
             {
-                for (int y = 0; y < GameBoardHeight; y++)
+                for (int y = 0; y < _countCells.Y; y++)
                 {
                     int count = 0;
-                    if (!boardSquares[x, y].MineHave)
+                    if (!_board[x, y].MineHave)
                     {
                         for (int miniX = x - 1; miniX <= x + 1; miniX++)
                         {
                             for (int miniY = y - 1; miniY <= y + 1; miniY++)
                             {
-                                if (miniX >= 0 && miniY >= 0 && miniX < GameBoardWidth && miniY < GameBoardHeight)
+                                if (miniX >= 0 && miniY >= 0 && miniX < _countCells.X && miniY < _countCells.Y)
                                 {
-                                    if (boardSquares[miniX, miniY].MineHave)
+                                    if (_board[miniX, miniY].MineHave)
                                     {
                                         count = count + 1;
                                     }
@@ -99,25 +142,14 @@ namespace Miner
                     }
                     if (count > 0)
                     {
-                        boardSquares[x, y].AddNumber(count);
+                        _board[x, y].AddNumber(count);
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// обнуление 2 суффиксов ячейки Press Select
-        /// </summary>
-        /// <param name="x">X ячейки</param>
-        /// <param name="y">Y ячейки</param>
-        public void Clear2Suffix(int x, int y)
-        {
-            if (boardSquares[x, y].SuffixPress && !boardSquares[x, y].SuffixSelect) // недаст убрать PressOn пока ячейка Select
-                boardSquares[x, y].SuffixPress = false;
-            if (boardSquares[x, y].SuffixSelect)
-                boardSquares[x, y].SuffixSelect = false;
-        }
-
+        #region old methods
+        
         /// <summary>
         /// открыть все пустые ячейки рядом с начальной
         /// </summary>
@@ -144,7 +176,7 @@ namespace Miner
                 }
             }
         }
-
+        /*
         /// <summary>
         /// проверка состояния ячейки и установка соответствующих суффиксов
         /// </summary>
@@ -216,5 +248,7 @@ namespace Miner
                 //ClearBoard();
             }
         }
+        */
+        #endregion
     }
 }
